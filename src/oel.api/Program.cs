@@ -15,14 +15,17 @@ builder.Services.AddOpenApi();
 
 WebApplication app = builder.Build();
 
-app.UsePathBase(new PathString("/api"));
-app.MapControllers();
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
+app.MapGroup("/api").MapControllers();
+app.MapFallback("/api/{**path}", () => Results.NotFound());
+app.MapFallbackToFile("index.html");
 
 // Apply migrations automatically on startup
 using (IServiceScope scope = app.Services.CreateScope())
 {
     Console.WriteLine("Applying migrations...");
-    Console.WriteLine($"Connection string used: {builder.Configuration.GetConnectionString("DatabaseConnection")}");
     var db = scope.ServiceProvider.GetRequiredService<OelContext>();
     db.Database.Migrate();
 }

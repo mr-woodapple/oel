@@ -1,8 +1,9 @@
-# Reusable workflow to build the BiteBoard frontend project.
-name: BiteBoard Frontend Build
+# Reusable workflow to build the Oel frontend project.
+name: Oel Frontend Build
 
 env:
   FE_LOCATION: './src/oel.frontend/'
+  NODE_VERSION: '24'
 
 on:
   workflow_call:
@@ -25,8 +26,12 @@ jobs:
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ${{ env.FE_LOCATION }}/package-lock.json
 
-      - name: Install dependecies
+      - name: Install dependencies
         run: npm ci
 
       - name: Run npm build

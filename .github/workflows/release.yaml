@@ -1,4 +1,4 @@
-# Creates a GitHub release and publishes versioned container images for semantic version tags.
+# Creates a GitHub release and publishes a versioned container image for semantic version tags.
 name: Release
 
 on:
@@ -25,6 +25,8 @@ jobs:
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
+        with:
+          node-version: '24'
 
       - name: Validate release version
         id: version
@@ -40,13 +42,13 @@ jobs:
           fi
 
           VERSION="${TAG#v}"
-          PACKAGE_VERSION="$(node -p "require('./src/BiteBoard.Frontend/package.json').version")"
-          LOCK_VERSION="$(node -p "require('./src/BiteBoard.Frontend/package-lock.json').version")"
-          LOCK_ROOT_VERSION="$(node -p "require('./src/BiteBoard.Frontend/package-lock.json').packages[''].version")"
+          PACKAGE_VERSION="$(node -p "require('./src/oel.frontend/package.json').version")"
+          LOCK_VERSION="$(node -p "require('./src/oel.frontend/package-lock.json').version")"
+          LOCK_ROOT_VERSION="$(node -p "require('./src/oel.frontend/package-lock.json').packages[''].version")"
 
           if [[ "$PACKAGE_VERSION" != "$VERSION" || "$LOCK_VERSION" != "$VERSION" || "$LOCK_ROOT_VERSION" != "$VERSION" ]]; then
             echo "::error::Tag version '$VERSION' must match package.json ('$PACKAGE_VERSION') and package-lock.json ('$LOCK_VERSION', '$LOCK_ROOT_VERSION')."
-            echo "::error::Run 'npm version $VERSION --no-git-tag-version' in src/BiteBoard.Frontend, commit both files, and tag that commit."
+            echo "::error::Run 'npm version $VERSION --no-git-tag-version' in src/oel.frontend, commit both files, and tag that commit."
             exit 1
           fi
 
@@ -68,8 +70,8 @@ jobs:
     needs: validate-tag
     uses: ./.github/workflows/build-frontend.yaml
 
-  publish-versioned-images:
-    name: Publish Versioned Docker Images
+  publish-versioned-image:
+    name: Publish Versioned Docker Image
     needs: [validate-tag, build-backend, build-frontend]
     uses: ./.github/workflows/publish-docker.yaml
     with:
@@ -79,7 +81,7 @@ jobs:
 
   create-release:
     name: Create GitHub Release
-    needs: [validate-tag, publish-versioned-images]
+    needs: [validate-tag, publish-versioned-image]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -92,7 +94,7 @@ jobs:
           TAG: ${{ github.ref_name }}
         shell: bash
         run: |
-          ARGS=("$TAG" --verify-tag --generate-notes --title "BiteBoard $TAG")
+          ARGS=("$TAG" --verify-tag --generate-notes --title "Oel $TAG")
 
           if [[ "$IS_PRERELEASE" == "true" ]]; then
             ARGS+=(--prerelease)
