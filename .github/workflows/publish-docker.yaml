@@ -1,6 +1,6 @@
-# Reusable workflow to build and publish container images.
+# Reusable workflow to build and publish the Oel container image.
 
-name: Publish Docker Images
+name: Publish Docker Image
 
 on:
   workflow_call:
@@ -22,8 +22,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  FE_IMAGE_NAME: biteboard-frontend
-  BE_IMAGE_NAME: biteboard-backend
+  IMAGE_NAME: oel
 
 jobs:
   build-and-push:
@@ -38,7 +37,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v6
 
-      # Assemble tags (for PRs it's :dev and :pr-<pull-request-number>)
+      # Assemble tags (for PRs it's :dev and :pr-<pull-request-number>).
       - name: Compose image tags
         id: tags
         shell: bash
@@ -47,25 +46,21 @@ jobs:
           TAG_SUFFIX: ${{ inputs.tag_suffix }}
           VERSION: ${{ inputs.version }}
         run: |
-          FE_BASE="${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.FE_IMAGE_NAME }}"
-          BE_BASE="${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.BE_IMAGE_NAME }}"
+          IMAGE_BASE="${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}"
+          IMAGE_BASE="${IMAGE_BASE,,}"
 
           case "$STAGE" in
             dev)
-              FE_TAGS="$FE_BASE:dev"
-              BE_TAGS="$BE_BASE:dev"
+              TAGS="$IMAGE_BASE:dev"
 
               if [ -n "$TAG_SUFFIX" ]; then
-                FE_TAGS="$FE_TAGS,$FE_BASE:$TAG_SUFFIX"
-                BE_TAGS="$BE_TAGS,$BE_BASE:$TAG_SUFFIX"
+                TAGS="$TAGS,$IMAGE_BASE:$TAG_SUFFIX"
               else
-                FE_TAGS="$FE_TAGS,$FE_BASE:pr-${{ github.event.number }}"
-                BE_TAGS="$BE_TAGS,$BE_BASE:pr-${{ github.event.number }}"
+                TAGS="$TAGS,$IMAGE_BASE:pr-${{ github.event.number }}"
               fi
               ;;
             release)
-              FE_TAGS="$FE_BASE:release"
-              BE_TAGS="$BE_BASE:release"
+              TAGS="$IMAGE_BASE:release"
               ;;
             version)
               SEMVER_PATTERN='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-((0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)(\.(0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*))?$'
@@ -75,14 +70,12 @@ jobs:
                 exit 1
               fi
 
-              FE_TAGS="$FE_BASE:$VERSION"
-              BE_TAGS="$BE_BASE:$VERSION"
+              TAGS="$IMAGE_BASE:$VERSION"
 
               if [[ "$VERSION" != *-* ]]; then
                 IFS='.' read -r MAJOR MINOR_PATCH <<< "$VERSION"
                 MINOR="${MINOR_PATCH%%.*}"
-                FE_TAGS="$FE_TAGS,$FE_BASE:$MAJOR.$MINOR,$FE_BASE:$MAJOR,$FE_BASE:latest"
-                BE_TAGS="$BE_TAGS,$BE_BASE:$MAJOR.$MINOR,$BE_BASE:$MAJOR,$BE_BASE:latest"
+                TAGS="$TAGS,$IMAGE_BASE:$MAJOR.$MINOR,$IMAGE_BASE:$MAJOR,$IMAGE_BASE:latest"
               fi
               ;;
             *)
@@ -91,8 +84,7 @@ jobs:
               ;;
           esac
 
-          echo "fe_tags=$FE_TAGS" >> "$GITHUB_OUTPUT"
-          echo "be_tags=$BE_TAGS" >> "$GITHUB_OUTPUT"
+          echo "tags=$TAGS" >> "$GITHUB_OUTPUT"
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v4
@@ -101,20 +93,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and Push Frontend Image
-        id: push-frontend
-        uses: docker/build-push-action@v7
-        with:
-          context: ./src/BiteBoard.Frontend
-          file: ./src/BiteBoard.Frontend/Dockerfile
-          push: true
-          tags: ${{ steps.tags.outputs.fe_tags }}
-
-      - name: Build and Push Backend image
-        id: push-backend
+      - name: Build and Push Oel Image
+        id: push-oel
         uses: docker/build-push-action@v7
         with:
           context: .
-          file: ./src/BiteBoard.Api/Dockerfile
+          file: ./oel
           push: true
-          tags: ${{ steps.tags.outputs.be_tags }}
+          tags: ${{ steps.tags.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

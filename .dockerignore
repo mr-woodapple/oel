@@ -1,0 +1,10 @@
+.git
+.github
+.idea
+.vscode
+**/.DS_Store
+**/bin
+**/dist
+**/node_modules
+**/obj
+src/oel.api/appsettings.Development.json

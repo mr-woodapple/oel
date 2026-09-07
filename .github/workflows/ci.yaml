@@ -21,8 +21,8 @@ jobs:
     name: Build Frontend
     uses: ./.github/workflows/build-frontend.yaml
 
-  publish-dev-images:
-    name: Publish Docker Dev Images
+  publish-dev-image:
+    name: Publish Docker Dev Image
     needs: [build-backend, build-frontend]
     uses: ./.github/workflows/publish-docker.yaml
     with:

@@ -1,9 +1,9 @@
-# Reusable workflow to build the BiteBoard backend project.
-name: BiteBoard Backend Build
+# Reusable workflow to build the Oel backend project.
+name: Oel Backend Build
 
 env:
   APP_LOCATION: './src/oel.api/' 
-  DOTNET_VERSION: '10'
+  DOTNET_VERSION: '10.0.x'
 
 on:
   workflow_call:
