@@ -3,6 +3,7 @@
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
 @import "@fontsource-variable/noto-sans";
+@import "@silk-hq/components/unlayered-styles.css" layer(silk);
 
 @custom-variant dark (&:is(.dark *));
 

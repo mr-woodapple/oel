@@ -28,10 +28,10 @@ export function useBeer() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: beerKeys.all });
-      toast.success("Created new account! 🎉");
+      toast.success("Created new beer! 🎉");
     },
     onError: () => {
-      toast.error("Failed to add account!");
+      toast.error("Failed to add beer!");
     }
   });
 

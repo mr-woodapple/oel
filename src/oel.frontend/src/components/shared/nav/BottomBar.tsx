@@ -17,11 +17,11 @@ export default function BottomBar({ onAddClick }: BottomBarProps) {
           {({ isActive }) => <BottomBarButton isActive={isActive} iconName="House" />}
         </NavLink>
 
-        <NavLink to="stats">
+        <NavLink to="beers">
           {({ isActive }) => <BottomBarButton isActive={isActive} iconName="ChartSpline" />}
         </NavLink>
 
-        <NavLink to="settings">
+        <NavLink to="logs">
           {({ isActive }) => <BottomBarButton isActive={isActive} iconName="UserCog" />}
         </NavLink>
 
