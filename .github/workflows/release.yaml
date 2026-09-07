@@ -1,0 +1,101 @@
+# Creates a GitHub release and publishes versioned container images for semantic version tags.
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  packages: write
+  attestations: write
+  id-token: write
+
+jobs:
+  validate-tag:
+    name: Validate Semantic Version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+
+      - name: Validate release version
+        id: version
+        shell: bash
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          SEMVER_PATTERN='^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-((0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)(\.(0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*))?$'
+
+          if [[ ! "$TAG" =~ $SEMVER_PATTERN ]]; then
+            echo "Tag '$TAG' is invalid. Use vMAJOR.MINOR.PATCH, optionally followed by a SemVer prerelease."
+            exit 1
+          fi
+
+          VERSION="${TAG#v}"
+          PACKAGE_VERSION="$(node -p "require('./src/BiteBoard.Frontend/package.json').version")"
+          LOCK_VERSION="$(node -p "require('./src/BiteBoard.Frontend/package-lock.json').version")"
+          LOCK_ROOT_VERSION="$(node -p "require('./src/BiteBoard.Frontend/package-lock.json').packages[''].version")"
+
+          if [[ "$PACKAGE_VERSION" != "$VERSION" || "$LOCK_VERSION" != "$VERSION" || "$LOCK_ROOT_VERSION" != "$VERSION" ]]; then
+            echo "::error::Tag version '$VERSION' must match package.json ('$PACKAGE_VERSION') and package-lock.json ('$LOCK_VERSION', '$LOCK_ROOT_VERSION')."
+            echo "::error::Run 'npm version $VERSION --no-git-tag-version' in src/BiteBoard.Frontend, commit both files, and tag that commit."
+            exit 1
+          fi
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+          if [[ "$VERSION" == *-* ]]; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  build-backend:
+    name: Build Backend
+    needs: validate-tag
+    uses: ./.github/workflows/build-backend.yaml
+
+  build-frontend:
+    name: Build Frontend
+    needs: validate-tag
+    uses: ./.github/workflows/build-frontend.yaml
+
+  publish-versioned-images:
+    name: Publish Versioned Docker Images
+    needs: [validate-tag, build-backend, build-frontend]
+    uses: ./.github/workflows/publish-docker.yaml
+    with:
+      stage: version
+      version: ${{ needs.validate-tag.outputs.version }}
+    secrets: inherit
+
+  create-release:
+    name: Create GitHub Release
+    needs: [validate-tag, publish-versioned-images]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          IS_PRERELEASE: ${{ needs.validate-tag.outputs.prerelease }}
+          TAG: ${{ github.ref_name }}
+        shell: bash
+        run: |
+          ARGS=("$TAG" --verify-tag --generate-notes --title "BiteBoard $TAG")
+
+          if [[ "$IS_PRERELEASE" == "true" ]]; then
+            ARGS+=(--prerelease)
+          fi
+
+          gh release create "${ARGS[@]}"

@@ -1,0 +1,30 @@
+# Workflow to run if on pull requests towards main
+name: CI
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: ["main"]
+
+permissions:
+  contents: read
+  packages: write
+  attestations: write
+  id-token: write
+
+jobs:
+  build-backend:
+    name: Build Backend
+    uses: ./.github/workflows/build-backend.yaml
+
+  build-frontend:
+    name: Build Frontend
+    uses: ./.github/workflows/build-frontend.yaml
+
+  publish-dev-images:
+    name: Publish Docker Dev Images
+    needs: [build-backend, build-frontend]
+    uses: ./.github/workflows/publish-docker.yaml
+    with:
+      stage: dev
+    secrets: inherit

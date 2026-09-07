@@ -1,5 +1,5 @@
 info:
-  name: beer
+  name: post beer
   type: http
   seq: 2
 
@@ -10,9 +10,9 @@ http:
     type: json
     data: |-
       {
-        "Name": "Testbier",
-        "Brewery": "Testbrauerei",
-        "Style": "Teststyle"
+        "name": "Testbier",
+        "brewery": "Testbrauerei",
+        "style": "Teststyle"
       }
   auth: inherit
 

@@ -95,7 +95,7 @@ function DrawerContent({
               className="h-full overscroll-contain"
               nativeScrollbar={false}
             >
-              <Scroll.Content className="apple-safe-area flex min-h-full w-full min-w-0 max-w-full flex-col">
+              <Scroll.Content className="flex min-h-full w-full min-w-0 max-w-full flex-col [padding-bottom:env(safe-area-inset-bottom)]">
                 {children}
               </Scroll.Content>
             </Scroll.View>

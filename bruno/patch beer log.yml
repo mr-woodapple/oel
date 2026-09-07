@@ -1,0 +1,22 @@
+info:
+  name: patch beer log
+  type: http
+  seq: 7
+
+http:
+  method: PATCH
+  url: "{{API_URL}}/beerlog/1"
+  body:
+    type: json
+    data: |-
+      {
+        "rating": 4.5,
+        "location": "Mikkeller Bar"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

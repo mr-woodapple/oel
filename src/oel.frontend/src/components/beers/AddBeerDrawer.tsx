@@ -1,0 +1,205 @@
+import { useState, type FormEvent } from "react";
+
+import { useBeer } from "@/api/hooks/useBeer";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeading,
+  DrawerTitle,
+} from "@/components/shared/GenericDrawer";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { beerStyles } from "@/data/beerStyles";
+import type { CreateBeerInput } from "@/models/Beer";
+
+type AddBeerDrawerProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+};
+
+const initialForm = {
+  name: "",
+  brewery: "",
+  style: "",
+  abv: "",
+  ibu: "",
+  appearance: "",
+  tastingNotes: "",
+  generalNotes: "",
+};
+
+export function AddBeerDrawer({ open, onOpenChange }: AddBeerDrawerProps) {
+  const { addBeer } = useBeer();
+  const [form, setForm] = useState(initialForm);
+
+  function updateField(field: keyof typeof initialForm, value: string) {
+    setForm((current) => ({ ...current, [field]: value }));
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const newBeer: CreateBeerInput = {
+      name: form.name.trim(),
+      brewery: form.brewery.trim(),
+      style: form.style.trim(),
+      abv: form.abv === "" ? null : Number(form.abv),
+      ibu: form.ibu === "" ? null : Number(form.ibu),
+      appearance: form.appearance.trim() || null,
+      tastingNotes: form.tastingNotes.trim() || null,
+      generalNotes: form.generalNotes.trim() || null,
+    };
+
+    try {
+      await addBeer.mutateAsync(newBeer);
+      setForm(initialForm);
+      onOpenChange(false);
+    } catch {
+      // The mutation displays the user-facing error toast.
+    }
+  }
+
+  return (
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent>
+        <DrawerHeading className="border-b border-border/70">
+          <DrawerTitle className="text-left text-xl font-semibold text-foreground">Bier hinzufügen</DrawerTitle>
+          <DrawerDescription className="mt-1 text-left text-sm text-muted-foreground">
+            Lege die Stammdaten und deine ersten Eindrücke fest.
+          </DrawerDescription>
+        </DrawerHeading>
+
+        <form className="flex flex-col gap-6 px-5 pb-8 pt-5 text-left" onSubmit={handleSubmit}>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <FormField label="Name" htmlFor="beer-name" required>
+              <Input
+                id="beer-name"
+                className="h-11 rounded-xl text-base"
+                value={form.name}
+                onChange={(event) => updateField("name", event.target.value)}
+                autoComplete="off"
+                required
+              />
+            </FormField>
+            <FormField label="Brauerei" htmlFor="beer-brewery" required>
+              <Input
+                id="beer-brewery"
+                className="h-11 rounded-xl text-base"
+                value={form.brewery}
+                onChange={(event) => updateField("brewery", event.target.value)}
+                required
+              />
+            </FormField>
+          </div>
+
+          <FormField label="Stil" htmlFor="beer-style" required>
+            <Select value={form.style} onValueChange={(value) => updateField("style", value ?? "")}>
+              <SelectTrigger id="beer-style" className="h-11 w-full rounded-xl text-base">
+                <SelectValue placeholder="Bierstil auswählen" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl">
+                {beerStyles.map((beerStyle) => (
+                  <SelectItem key={beerStyle} value={beerStyle} className="text-sm">
+                    {beerStyle}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </FormField>
+
+          <div className="grid grid-cols-2 gap-4">
+            <FormField label="Alkoholgehalt (%)" htmlFor="beer-abv">
+              <Input
+                id="beer-abv"
+                className="h-11 rounded-xl text-base"
+                type="number"
+                inputMode="decimal"
+                min="0"
+                max="100"
+                step="0.1"
+                value={form.abv}
+                onChange={(event) => updateField("abv", event.target.value)}
+              />
+            </FormField>
+            <FormField label="Bitterkeit (IBU)" htmlFor="beer-ibu">
+              <Input
+                id="beer-ibu"
+                className="h-11 rounded-xl text-base"
+                type="number"
+                inputMode="numeric"
+                min="0"
+                step="1"
+                value={form.ibu}
+                onChange={(event) => updateField("ibu", event.target.value)}
+              />
+            </FormField>
+          </div>
+
+          <FormField label="Aussehen" htmlFor="beer-appearance">
+            <Textarea
+              id="beer-appearance"
+              className="min-h-24 rounded-xl text-base"
+              placeholder="Farbe, Schaum, Klarheit …"
+              value={form.appearance}
+              onChange={(event) => updateField("appearance", event.target.value)}
+            />
+          </FormField>
+          <FormField label="Geschmacksnotizen" htmlFor="beer-tasting-notes">
+            <Textarea
+              id="beer-tasting-notes"
+              className="min-h-24 rounded-xl text-base"
+              placeholder="Aromen, Mundgefühl, Abgang …"
+              value={form.tastingNotes}
+              onChange={(event) => updateField("tastingNotes", event.target.value)}
+            />
+          </FormField>
+          <FormField label="Allgemeine Notizen" htmlFor="beer-general-notes">
+            <Textarea
+              id="beer-general-notes"
+              className="min-h-24 rounded-xl text-base"
+              value={form.generalNotes}
+              onChange={(event) => updateField("generalNotes", event.target.value)}
+            />
+          </FormField>
+
+          <div className="sticky bottom-0 -mx-5 mt-1 flex gap-3 border-t bg-background/95 px-5 pt-4 backdrop-blur">
+            <Button type="button" variant="outline" className="h-11 flex-1 rounded-xl text-sm" onClick={() => onOpenChange(false)}>
+              Abbrechen
+            </Button>
+            <Button type="submit" className="h-11 flex-1 rounded-xl text-sm" disabled={!form.style || addBeer.isPending}>
+              {addBeer.isPending ? "Wird gespeichert …" : "Bier speichern"}
+            </Button>
+          </div>
+        </form>
+      </DrawerContent>
+    </Drawer>
+  );
+}
+
+type FormFieldProps = {
+  label: string;
+  htmlFor: string;
+  required?: boolean;
+  children: React.ReactNode;
+};
+
+function FormField({ label, htmlFor, required, children }: FormFieldProps) {
+  return (
+    <div className="grid gap-2">
+      <Label htmlFor={htmlFor} className="text-sm font-medium text-foreground">
+        {label}{required && <span className="text-destructive">*</span>}
+      </Label>
+      {children}
+    </div>
+  );
+}

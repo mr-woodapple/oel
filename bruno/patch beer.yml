@@ -1,0 +1,22 @@
+info:
+  name: patch beer
+  type: http
+  seq: 3
+
+http:
+  method: PATCH
+  url: "{{API_URL}}/beer/1"
+  body:
+    type: json
+    data: |-
+      {
+        "tastingNotes": "Citrus, pine and a dry finish",
+        "ibu": 55
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

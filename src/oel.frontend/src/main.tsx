@@ -12,6 +12,8 @@ import Beers from '@/pages/Beers'
 import BeerLogs from '@/pages/BeerLogs'
 import NotFound from '@/pages/NotFound'
 import Home from '@/pages/Home'
+import Beer from '@/pages/beers/Beer'
+import BeerLog from '@/pages/beerlogs/BeerLog'
 
 const queryClient = new QueryClient()
 
@@ -24,7 +26,9 @@ createRoot(document.getElementById('root')!).render(
           <Route element={<MainLayout />}>
             <Route index element={<Home />} />
             <Route path='beers' element={<Beers />} />
+            <Route path='beers/:beerId' element={<Beer />} />
             <Route path='logs' element={<BeerLogs />} />
+            <Route path='logs/:beerLogId' element={<BeerLog />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>

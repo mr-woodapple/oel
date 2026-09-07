@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { BEER_API_ROUTE, beerKeys } from "../queries/beerQueries";
 import { fetchApi } from "../api";
-import type { Beer } from "@/models/Beer";
+import type { Beer, CreateBeerInput } from "@/models/Beer";
 
 export function useBeer() {
   const queryClient = useQueryClient();
@@ -16,22 +16,22 @@ export function useBeer() {
       return response;
     },
     staleTime: 1000 * 60 * 5, // 5 Minutes
-    select: (data) => data.sort((a, b) => a.name.localeCompare(b.name)) // Sort alphabetically by name
+    select: (data) => [...data].sort((a, b) => a.name.localeCompare(b.name))
   });
 
   // Create beer
   const addBeer = useMutation({
-    mutationFn: (newBeer: Omit<Beer, "id">) =>
+    mutationFn: (newBeer: CreateBeerInput) =>
       fetchApi<Beer>(BEER_API_ROUTE, {
         method: "POST",
         body: JSON.stringify(newBeer),
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: beerKeys.all });
-      toast.success("Created new beer! 🎉");
+      toast.success("Bier hinzugefügt");
     },
     onError: () => {
-      toast.error("Failed to add beer!");
+      toast.error("Bier konnte nicht hinzugefügt werden");
     }
   });
 

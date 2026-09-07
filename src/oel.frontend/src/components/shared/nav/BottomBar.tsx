@@ -1,7 +1,8 @@
 import { NavLink } from "react-router";
-import { ChartSpline, House, Plus, UserCog } from "lucide-react";
+import { Beer, ClipboardList, House, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 type BottomBarProps = {
   onAddClick?: () => void;
@@ -10,22 +11,22 @@ type BottomBarProps = {
 export default function BottomBar({ onAddClick }: BottomBarProps) {
 
   return (
-    <div className="apple-safe-area z-50 w-full bg-white border-t border-gray-200">
+    <div className="z-40 w-full border-t border-border/70 bg-background/95 backdrop-blur [padding-bottom:env(safe-area-inset-bottom)]">
       <div className="h-16 grid grid-cols-4 items-center justify-items-center">
 
-        <NavLink to="/">
-          {({ isActive }) => <BottomBarButton isActive={isActive} iconName="House" />}
+        <NavLink to="/" end aria-label="Übersicht">
+          {({ isActive }) => <BottomBarButton isActive={isActive} iconName="home" />}
         </NavLink>
 
-        <NavLink to="beers">
-          {({ isActive }) => <BottomBarButton isActive={isActive} iconName="ChartSpline" />}
+        <NavLink to="/beers" aria-label="Biere">
+          {({ isActive }) => <BottomBarButton isActive={isActive} iconName="beers" />}
         </NavLink>
 
-        <NavLink to="logs">
-          {({ isActive }) => <BottomBarButton isActive={isActive} iconName="UserCog" />}
+        <NavLink to="/logs" aria-label="Bier-Logs">
+          {({ isActive }) => <BottomBarButton isActive={isActive} iconName="logs" />}
         </NavLink>
 
-        <Button onClick={onAddClick}>
+        <Button size="icon" className="size-11 rounded-2xl shadow-sm" onClick={onAddClick} aria-label="Hinzufügen">
           <Plus />
         </Button>
       </div>
@@ -36,17 +37,20 @@ export default function BottomBar({ onAddClick }: BottomBarProps) {
 
 type BottomBarButtonProps = {
   isActive?: boolean
-  iconName?: "House" | "ChartSpline" | "UserCog"
+  iconName: "home" | "beers" | "logs"
 }
 
 function BottomBarButton({ isActive, iconName }: BottomBarButtonProps) {
   const props = { strokeWidth: isActive ? 3 : 2 };
 
   return (
-    <Button variant={isActive ? "secondary" : "ghost"}>
-      {iconName === "House" && <House {...props} />}
-      {iconName === "ChartSpline" && <ChartSpline {...props} />}
-      {iconName === "UserCog" && <UserCog {...props} />}
-    </Button>
+    <span className={cn(
+      "flex size-10 items-center justify-center rounded-xl transition-colors",
+      isActive ? "bg-secondary text-secondary-foreground" : "text-muted-foreground",
+    )}>
+      {iconName === "home" && <House {...props} />}
+      {iconName === "beers" && <Beer {...props} />}
+      {iconName === "logs" && <ClipboardList {...props} />}
+    </span>
   )
 }

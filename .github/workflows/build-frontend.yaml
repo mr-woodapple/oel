@@ -1,0 +1,33 @@
+# Reusable workflow to build the BiteBoard frontend project.
+name: BiteBoard Frontend Build
+
+env:
+  FE_LOCATION: './src/oel.frontend/'
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  build-frontend:
+    runs-on: ubuntu-latest
+    name: Build frontend
+    defaults:
+      run:
+        working-directory: ${{ env.FE_LOCATION }}
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+
+      - name: Install dependecies
+        run: npm ci
+
+      - name: Run npm build
+        run: npm run build

@@ -1,0 +1,31 @@
+# Reusable workflow to build the BiteBoard backend project.
+name: BiteBoard Backend Build
+
+env:
+  APP_LOCATION: './src/oel.api/' 
+  DOTNET_VERSION: '10'
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build AspNetCore web api
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        run: dotnet restore ${{ env.APP_LOCATION }}
+
+      - name: Build
+        run: dotnet build ${{ env.APP_LOCATION }} -c Release --no-restore
