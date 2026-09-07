@@ -1,0 +1,24 @@
+info:
+  name: beer log
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: "{{API_URL}}/beerlog"
+  body:
+    type: json
+    data: |-
+      {
+        "rating": 5,
+        "location": "Dahoam",
+        "beerId": 1,
+        "servingFormat": "Bottle"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
