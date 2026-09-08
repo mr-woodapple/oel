@@ -6,7 +6,7 @@ public sealed class BeerLogPatchRequest
 {
     public double? Rating { get; init; }
     public ServingFormats? Format { get; init; }
-    public string? Location { get; init; }
+    public BeerLogLocationRequest? Location { get; init; }
     public DateTimeOffset? DateLogged { get; init; }
     public int? BeerId { get; init; }
 }

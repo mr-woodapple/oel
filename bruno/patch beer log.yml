@@ -11,7 +11,11 @@ http:
     data: |-
       {
         "rating": 4.5,
-        "location": "Mikkeller Bar"
+        "location": {
+          "name": "Mikkeller Bar",
+          "latitude": 55.6761,
+          "longitude": 12.5683
+        }
       }
   auth: inherit
 

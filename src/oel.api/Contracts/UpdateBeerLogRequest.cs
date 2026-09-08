@@ -2,7 +2,7 @@ using Oel.Api.Enums;
 
 namespace Oel.Api.Contracts;
 
-public sealed class CreateBeerLogRequest
+public sealed class UpdateBeerLogRequest
 {
     public double Rating { get; init; }
     public ServingFormats Format { get; init; }
@@ -10,4 +10,5 @@ public sealed class CreateBeerLogRequest
     public DateTimeOffset? DateLogged { get; init; }
     public int BeerId { get; init; }
     public IFormFile? Photo { get; init; }
+    public bool RemovePhoto { get; init; }
 }

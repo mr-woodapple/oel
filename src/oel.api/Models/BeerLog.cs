@@ -11,7 +11,9 @@ public class BeerLog
         
     // Context
     public ServingFormats Format { get; set; }
-    public string? Location { get; set; }
+    public string? LocationName { get; set; }
+    public double? Latitude { get; set; }
+    public double? Longitude { get; set; }
     public DateTimeOffset DateLogged { get; set; }
 
     // Optional photo stored separately from normal API responses.

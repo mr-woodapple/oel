@@ -20,9 +20,19 @@ type PhotoInputProps = {
   id: string;
   photo: File | null;
   onChange: (photo: File | null) => void;
+  existingPhotoUrl?: string | null;
+  existingPhotoRemoved?: boolean;
+  onExistingPhotoRemovedChange?: (removed: boolean) => void;
 };
 
-export function PhotoInput({ id, photo, onChange }: PhotoInputProps) {
+export function PhotoInput({
+  id,
+  photo,
+  onChange,
+  existingPhotoUrl = null,
+  existingPhotoRemoved = false,
+  onExistingPhotoRemovedChange,
+}: PhotoInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -53,23 +63,33 @@ export function PhotoInput({ id, photo, onChange }: PhotoInputProps) {
     }
 
     setPreviewUrl(selectedPhoto ? URL.createObjectURL(selectedPhoto) : null);
+    if (selectedPhoto) onExistingPhotoRemovedChange?.(false);
     onChange(selectedPhoto);
   }
 
   function removePhoto() {
     setError(null);
-    setPreviewUrl(null);
-    onChange(null);
+    if (photo) {
+      setPreviewUrl(null);
+      onChange(null);
+      return;
+    }
+
+    if (existingPhotoUrl) onExistingPhotoRemovedChange?.(true);
   }
+
+  const displayedPhotoUrl = previewUrl ?? (
+    existingPhotoUrl && !existingPhotoRemoved ? existingPhotoUrl : null
+  );
 
   return (
     <div className="grid gap-2">
       <Label htmlFor={id} className="text-sm font-medium text-foreground">Foto</Label>
-      {photo && previewUrl && (
+      {displayedPhotoUrl && (
         <div className="relative overflow-hidden rounded-2xl border bg-muted">
           <img
-            src={previewUrl}
-            alt="Vorschau des ausgewählten Fotos"
+            src={displayedPhotoUrl}
+            alt={photo ? "Vorschau des ausgewählten Fotos" : "Aktuell gespeichertes Foto"}
             className="aspect-[4/3] max-h-72 w-full object-cover"
           />
           <Button
@@ -84,22 +104,26 @@ export function PhotoInput({ id, photo, onChange }: PhotoInputProps) {
           </Button>
         </div>
       )}
-      <div className="relative">
-        <ImagePlus className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          ref={inputRef}
-          id={id}
-          type="file"
-          accept="image/jpeg,image/png,image/webp,image/gif,image/avif,image/heic,image/heif"
-          className="h-11 rounded-xl pl-10 text-base file:mr-3"
-          onChange={handleChange}
-          aria-describedby={`${id}-help${error ? ` ${id}-error` : ""}`}
-          aria-invalid={Boolean(error)}
-        />
-      </div>
-      <p id={`${id}-help`} className="text-xs text-muted-foreground">
-        Optional · maximal 10 MB
-      </p>
+      {!displayedPhotoUrl && (
+        <>
+          <div className="relative">
+            <ImagePlus className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              ref={inputRef}
+              id={id}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif,image/avif,image/heic,image/heif"
+              className="h-11 rounded-xl pl-10 text-base file:mr-3"
+              onChange={handleChange}
+              aria-describedby={`${id}-help${error ? ` ${id}-error` : ""}`}
+              aria-invalid={Boolean(error)}
+            />
+          </div>
+          <p id={`${id}-help`} className="text-xs text-muted-foreground">
+            Optional · maximal 10 MB
+          </p>
+        </>
+      )}
       {error && <p id={`${id}-error`} className="text-sm text-destructive">{error}</p>}
     </div>
   );

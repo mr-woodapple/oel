@@ -1,4 +1,15 @@
-import { servingFormats, type ServingFormat } from "@/models/BeerLog";
+import { servingFormats, type BeerLogLocation, type ServingFormat } from "@/models/BeerLog";
+
+export function formatLocation(location: BeerLogLocation | null) {
+  if (!location) return "Nicht angegeben";
+  if (location.name) return location.name;
+
+  if (location.latitude !== null && location.longitude !== null) {
+    return `${location.latitude.toFixed(5)}, ${location.longitude.toFixed(5)}`;
+  }
+
+  return "Koordinaten nicht verfügbar";
+}
 
 const servingFormatLabels: Record<ServingFormat, string> = {
   [servingFormats.Draft]: "Fass",

@@ -1,0 +1,44 @@
+info:
+  name: put beer log
+  type: http
+  seq: 11
+
+http:
+  method: PUT
+  url: "{{API_URL}}/beerlog/1"
+  body:
+    type: multipart-form
+    data:
+      - name: rating
+        type: text
+        value: "4.5"
+      - name: format
+        type: text
+        value: "0"
+      - name: beerId
+        type: text
+        value: "1"
+      - name: dateLogged
+        type: text
+        value: "2026-09-08T20:00:00+02:00"
+      - name: location.name
+        type: text
+        value: Munich
+      - name: location.latitude
+        type: text
+        value: "48.13715"
+      - name: location.longitude
+        type: text
+        value: "11.57612"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Omit all `location.*` fields to clear the location.
+  To replace the photo, add a multipart file field named `photo`.
+  To remove the current photo, add `removePhoto` with the value `true`.
