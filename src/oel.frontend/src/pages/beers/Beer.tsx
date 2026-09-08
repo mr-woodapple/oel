@@ -1,4 +1,4 @@
-import { ArrowLeft, Beer as BeerIcon, Plus } from "lucide-react";
+import { ArrowLeft, Beer as BeerIcon, Pencil, Plus } from "lucide-react";
 import { Link, useParams } from "react-router";
 
 import { useBeer } from "@/api/hooks/useBeer";
@@ -16,7 +16,7 @@ export default function Beer() {
   const numericBeerId = Number(beerId);
   const { beers } = useBeer();
   const { beerLogs } = useBeerLogs();
-  const { openAddBeerLog } = useAppActions();
+  const { openAddBeerLog, openEditBeer } = useAppActions();
   const beer = beers.data?.find((candidate) => candidate.id === numericBeerId);
   const logs = beerLogs.data?.filter((log) => log.beerId === numericBeerId) ?? [];
 
@@ -56,9 +56,14 @@ export default function Beer() {
             <p className="mt-2 text-base text-muted-foreground">{beer.style}</p>
           </div>
         </div>
-        <Button className="h-11 rounded-xl px-4 text-sm" onClick={() => openAddBeerLog(beer.id)}>
-          <Plus /> Log hinzufügen
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" className="h-11 rounded-xl px-4 text-sm" onClick={() => openEditBeer(beer)}>
+            <Pencil /> Bearbeiten
+          </Button>
+          <Button className="h-11 rounded-xl px-4 text-sm" onClick={() => openAddBeerLog(beer.id)}>
+            <Plus /> Log hinzufügen
+          </Button>
+        </div>
       </header>
 
       {beer.photoUrl && (

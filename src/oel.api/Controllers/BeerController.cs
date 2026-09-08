@@ -124,6 +124,85 @@ public class BeerController(OelContext oelContext) : ControllerBase
         return File(photo.Photo, photo.PhotoContentType);
     }
 
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Put(
+        int id,
+        [FromForm] UpdateBeerRequest request,
+        CancellationToken cancellationToken)
+    {
+        var beer = await oelContext.Beers
+            .SingleOrDefaultAsync(candidate => candidate.Id == id, cancellationToken);
+
+        if (beer is null)
+        {
+            return NotFound();
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Name))
+        {
+            ModelState.AddModelError(nameof(request.Name), "Name is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Brewery))
+        {
+            ModelState.AddModelError(nameof(request.Brewery), "Brewery is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Style))
+        {
+            ModelState.AddModelError(nameof(request.Style), "Style is required.");
+        }
+
+        if (request.Abv is < 0 or > 100)
+        {
+            ModelState.AddModelError(nameof(request.Abv), "ABV must be between 0 and 100.");
+        }
+
+        if (request.Ibu < 0)
+        {
+            ModelState.AddModelError(nameof(request.Ibu), "IBU cannot be negative.");
+        }
+
+        if (request.RemovePhoto && request.Photo is not null)
+        {
+            ModelState.AddModelError(nameof(request.Photo), "A photo cannot be uploaded and removed at the same time.");
+        }
+
+        var (photo, photoError) = await PhotoUpload.ReadAsync(request.Photo, cancellationToken);
+        if (photoError is not null)
+        {
+            ModelState.AddModelError(nameof(request.Photo), photoError);
+        }
+
+        if (!ModelState.IsValid)
+        {
+            return ValidationProblem(ModelState);
+        }
+
+        beer.Name = request.Name.Trim();
+        beer.Brewery = request.Brewery.Trim();
+        beer.Style = request.Style.Trim();
+        beer.Abv = request.Abv;
+        beer.Ibu = request.Ibu;
+        beer.Appearance = NormalizeOptionalText(request.Appearance);
+        beer.TastingNotes = NormalizeOptionalText(request.TastingNotes);
+        beer.GeneralNotes = NormalizeOptionalText(request.GeneralNotes);
+
+        if (photo is not null)
+        {
+            beer.Photo = photo.Bytes;
+            beer.PhotoContentType = photo.ContentType;
+        }
+        else if (request.RemovePhoto)
+        {
+            beer.Photo = null;
+            beer.PhotoContentType = null;
+        }
+
+        await oelContext.SaveChangesAsync(cancellationToken);
+        return Ok(BeerResponse.FromEntity(beer));
+    }
+
     [HttpPatch("{id:int}")]
     public async Task<IActionResult> Patch(
         int id,
@@ -237,5 +316,11 @@ public class BeerController(OelContext oelContext) : ControllerBase
         await oelContext.SaveChangesAsync(cancellationToken);
 
         return NoContent();
+    }
+
+    private static string? NormalizeOptionalText(string? value)
+    {
+        var normalized = value?.Trim();
+        return string.IsNullOrEmpty(normalized) ? null : normalized;
     }
 }

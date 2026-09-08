@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
 import { useBeer } from "@/api/hooks/useBeer";
 import {
@@ -23,10 +23,11 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { PhotoInput } from "@/components/shared/PhotoInput";
 import { beerStyles } from "@/data/beerStyles";
-import type { CreateBeerInput } from "@/models/Beer";
+import type { Beer, CreateBeerInput, UpdateBeerInput } from "@/models/Beer";
 
 type AddBeerDrawerProps = {
   open: boolean;
+  beer?: Beer;
   onOpenChange: (open: boolean) => void;
 };
 
@@ -41,10 +42,34 @@ const initialForm = {
   generalNotes: "",
 };
 
-export function AddBeerDrawer({ open, onOpenChange }: AddBeerDrawerProps) {
-  const { addBeer } = useBeer();
-  const [form, setForm] = useState(initialForm);
+function formFromBeer(beer: Beer) {
+  return {
+    name: beer.name,
+    brewery: beer.brewery,
+    style: beer.style,
+    abv: beer.abv === null ? "" : String(beer.abv),
+    ibu: beer.ibu === null ? "" : String(beer.ibu),
+    appearance: beer.appearance ?? "",
+    tastingNotes: beer.tastingNotes ?? "",
+    generalNotes: beer.generalNotes ?? "",
+  };
+}
+
+export function AddBeerDrawer({ open, beer, onOpenChange }: AddBeerDrawerProps) {
+  const { addBeer, updateBeer } = useBeer();
+  const [form, setForm] = useState(() => beer ? formFromBeer(beer) : initialForm);
   const [photo, setPhoto] = useState<File | null>(null);
+  const [removePhoto, setRemovePhoto] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+
+    // Opening starts a fresh create/edit session with the current source data.
+    // oxlint-disable-next-line react/set-state-in-effect
+    setForm(beer ? formFromBeer(beer) : initialForm);
+    setPhoto(null);
+    setRemovePhoto(false);
+  }, [beer, open]);
 
   function updateField(field: keyof typeof initialForm, value: string) {
     setForm((current) => ({ ...current, [field]: value }));
@@ -53,7 +78,7 @@ export function AddBeerDrawer({ open, onOpenChange }: AddBeerDrawerProps) {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const newBeer: CreateBeerInput = {
+    const beerInput: CreateBeerInput = {
       name: form.name.trim(),
       brewery: form.brewery.trim(),
       style: form.style.trim(),
@@ -66,9 +91,16 @@ export function AddBeerDrawer({ open, onOpenChange }: AddBeerDrawerProps) {
     };
 
     try {
-      await addBeer.mutateAsync(newBeer);
-      setForm(initialForm);
-      setPhoto(null);
+      if (beer) {
+        const update: UpdateBeerInput = {
+          ...beerInput,
+          id: beer.id,
+          removePhoto,
+        };
+        await updateBeer.mutateAsync(update);
+      } else {
+        await addBeer.mutateAsync(beerInput);
+      }
       onOpenChange(false);
     } catch {
       // The mutation displays the user-facing error toast.
@@ -79,14 +111,16 @@ export function AddBeerDrawer({ open, onOpenChange }: AddBeerDrawerProps) {
     <Drawer open={open} onOpenChange={onOpenChange} swipeDirection="down">
       <DrawerContent>
         <DrawerHeader>
-          <DrawerTitle>Bier hinzufügen</DrawerTitle>
+          <DrawerTitle>{beer ? "Bier bearbeiten" : "Bier hinzufügen"}</DrawerTitle>
           <DrawerDescription>
-            Lege die Stammdaten und deine ersten Eindrücke fest.
+            {beer
+              ? "Passe die Stammdaten und deine Eindrücke an."
+              : "Lege die Stammdaten und deine ersten Eindrücke fest."}
           </DrawerDescription>
         </DrawerHeader>
 
         <form
-          id="add-beer-form"
+          id="beer-form"
           className="flex flex-1 flex-col gap-6 overflow-y-auto p-4"
           onSubmit={handleSubmit}
         >
@@ -155,7 +189,14 @@ export function AddBeerDrawer({ open, onOpenChange }: AddBeerDrawerProps) {
             </FormField>
           </div>
 
-          <PhotoInput id="beer-photo" photo={photo} onChange={setPhoto} />
+          <PhotoInput
+            id="beer-photo"
+            photo={photo}
+            onChange={setPhoto}
+            existingPhotoUrl={beer?.photoUrl}
+            existingPhotoRemoved={removePhoto}
+            onExistingPhotoRemovedChange={setRemovePhoto}
+          />
 
           <FormField label="Aussehen" htmlFor="beer-appearance">
             <Textarea
@@ -186,8 +227,14 @@ export function AddBeerDrawer({ open, onOpenChange }: AddBeerDrawerProps) {
         </form>
 
         <DrawerFooter>
-          <Button type="submit" form="add-beer-form" disabled={!form.style || addBeer.isPending}>
-            {addBeer.isPending ? "Wird gespeichert …" : "Bier speichern"}
+          <Button
+            type="submit"
+            form="beer-form"
+            disabled={!form.style || addBeer.isPending || updateBeer.isPending}
+          >
+            {addBeer.isPending || updateBeer.isPending
+              ? "Wird gespeichert …"
+              : beer ? "Änderungen speichern" : "Bier speichern"}
           </Button>
           <DrawerClose render={<Button type="button" variant="outline" />}>
             Abbrechen

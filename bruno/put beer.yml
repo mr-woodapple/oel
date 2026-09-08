@@ -1,0 +1,46 @@
+info:
+  name: put beer
+  type: http
+  seq: 10
+
+http:
+  method: PUT
+  url: "{{API_URL}}/beer/1"
+  body:
+    type: multipart-form
+    data:
+      - name: name
+        type: text
+        value: Updated Beer
+      - name: brewery
+        type: text
+        value: Example Brewery
+      - name: style
+        type: text
+        value: IPA
+      - name: abv
+        type: text
+        value: "6.5"
+      - name: ibu
+        type: text
+        value: "55"
+      - name: appearance
+        type: text
+        value: Golden and clear
+      - name: tastingNotes
+        type: text
+        value: Citrus and pine
+      - name: generalNotes
+        type: text
+        value: Updated through the full edit endpoint
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  To replace the photo, add a multipart file field named `photo`.
+  To remove the current photo, add `removePhoto` with the value `true`.

@@ -1,4 +1,4 @@
-import { ArrowLeft, CalendarDays, MapPin } from "lucide-react";
+import { ArrowLeft, CalendarDays, MapPin, Pencil } from "lucide-react";
 import { Link, useParams } from "react-router";
 
 import { useBeer } from "@/api/hooks/useBeer";
@@ -9,12 +9,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatLocation, formatLogDate, formatServingFormat } from "@/lib/beerFormatting";
+import { useAppActions } from "@/contexts/appActions";
 
 export default function BeerLog() {
   const { beerLogId } = useParams();
   const numericLogId = Number(beerLogId);
   const { beers } = useBeer();
   const { beerLogs } = useBeerLogs();
+  const { openEditBeerLog } = useAppActions();
   const log = beerLogs.data?.find((candidate) => candidate.id === numericLogId);
   const beer = beers.data?.find((candidate) => candidate.id === log?.beerId);
 
@@ -43,12 +45,17 @@ export default function BeerLog() {
         <ArrowLeft className="size-4" /> Alle Bier-Logs
       </Link>
 
-      <header className="border-b border-border/70 pb-7 text-left">
-        <p className="text-sm font-semibold uppercase tracking-[0.16em] text-primary">Bier-Log</p>
-        <h1 className="m-0! mt-1! text-3xl! font-semibold tracking-tight text-foreground sm:text-4xl!">
-          {beer?.name ?? "Unbekanntes Bier"}
-        </h1>
-        {beer && <p className="mt-2 text-base text-muted-foreground">{beer.brewery} · {beer.style}</p>}
+      <header className="flex flex-col gap-5 border-b border-border/70 pb-7 text-left sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-primary">Bier-Log</p>
+          <h1 className="m-0! mt-1! text-3xl! font-semibold tracking-tight text-foreground sm:text-4xl!">
+            {beer?.name ?? "Unbekanntes Bier"}
+          </h1>
+          {beer && <p className="mt-2 text-base text-muted-foreground">{beer.brewery} · {beer.style}</p>}
+        </div>
+        <Button variant="outline" className="h-11 rounded-xl px-4 text-sm" onClick={() => openEditBeerLog(log)}>
+          <Pencil /> Bearbeiten
+        </Button>
       </header>
 
       {log.photoUrl && (

@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { BEER_API_ROUTE, beerKeys } from "../queries/beerQueries";
 import { fetchApi } from "../api";
-import type { Beer, CreateBeerInput } from "@/models/Beer";
+import type { Beer, CreateBeerInput, UpdateBeerInput } from "@/models/Beer";
 
 export function useBeer() {
   const queryClient = useQueryClient();
@@ -35,13 +35,29 @@ export function useBeer() {
     }
   });
 
+  const updateBeer = useMutation({
+    mutationFn: (beer: UpdateBeerInput) =>
+      fetchApi<Beer>(`${BEER_API_ROUTE}/${beer.id}`, {
+        method: "PUT",
+        body: createBeerFormData(beer, beer.removePhoto),
+      }),
+    onSuccess: (updatedBeer) => {
+      queryClient.invalidateQueries({ queryKey: beerKeys.all });
+      toast.success(`${updatedBeer.name} aktualisiert`);
+    },
+    onError: () => {
+      toast.error("Bier konnte nicht aktualisiert werden");
+    },
+  });
+
   return {
     beers,
-    addBeer
+    addBeer,
+    updateBeer,
   };
 }
 
-function createBeerFormData(beer: CreateBeerInput) {
+function createBeerFormData(beer: CreateBeerInput, removePhoto = false) {
   const formData = new FormData();
   formData.append("name", beer.name);
   formData.append("brewery", beer.brewery);
@@ -53,6 +69,7 @@ function createBeerFormData(beer: CreateBeerInput) {
   if (beer.tastingNotes !== null) formData.append("tastingNotes", beer.tastingNotes);
   if (beer.generalNotes !== null) formData.append("generalNotes", beer.generalNotes);
   if (beer.photo !== null) formData.append("photo", beer.photo);
+  if (removePhoto) formData.append("removePhoto", "true");
 
   return formData;
 }

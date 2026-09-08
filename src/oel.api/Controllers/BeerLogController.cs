@@ -65,6 +65,12 @@ public class BeerLogController(OelContext oelContext) : ControllerBase
             ModelState.AddModelError(nameof(request.DateLogged), "Date logged is required.");
         }
 
+        if (request.Location is not null &&
+            (request.Location.Latitude is null || request.Location.Longitude is null))
+        {
+            ModelState.AddModelError(nameof(request.Location), "Latitude and longitude are required for a new location.");
+        }
+
         var beerExists = await oelContext.Beers
             .AnyAsync(beer => beer.Id == request.BeerId, cancellationToken);
 
@@ -120,6 +126,82 @@ public class BeerLogController(OelContext oelContext) : ControllerBase
         Response.Headers["X-Content-Type-Options"] = "nosniff";
         Response.Headers.CacheControl = "private, max-age=3600";
         return File(photo.Photo, photo.PhotoContentType);
+    }
+
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Put(
+        int id,
+        [FromForm] UpdateBeerLogRequest request,
+        CancellationToken cancellationToken)
+    {
+        var beerLog = await oelContext.BeerLogs
+            .SingleOrDefaultAsync(candidate => candidate.Id == id, cancellationToken);
+
+        if (beerLog is null)
+        {
+            return NotFound();
+        }
+
+        if (request.Rating is < 0 or > 5)
+        {
+            ModelState.AddModelError(nameof(request.Rating), "Rating must be between 0 and 5.");
+        }
+
+        if (!Enum.IsDefined(request.Format))
+        {
+            ModelState.AddModelError(nameof(request.Format), "Serving format is invalid.");
+        }
+
+        if (request.DateLogged is null)
+        {
+            ModelState.AddModelError(nameof(request.DateLogged), "Date logged is required.");
+        }
+
+        var beerExists = await oelContext.Beers
+            .AnyAsync(beer => beer.Id == request.BeerId, cancellationToken);
+
+        if (!beerExists)
+        {
+            ModelState.AddModelError(nameof(request.BeerId), "Beer does not exist.");
+        }
+
+        if (request.RemovePhoto && request.Photo is not null)
+        {
+            ModelState.AddModelError(nameof(request.Photo), "A photo cannot be uploaded and removed at the same time.");
+        }
+
+        var (photo, photoError) = await PhotoUpload.ReadAsync(request.Photo, cancellationToken);
+        if (photoError is not null)
+        {
+            ModelState.AddModelError(nameof(request.Photo), photoError);
+        }
+
+        if (!ModelState.IsValid)
+        {
+            return ValidationProblem(ModelState);
+        }
+
+        beerLog.Rating = request.Rating;
+        beerLog.Format = request.Format;
+        beerLog.LocationName = NormalizeLocationName(request.Location?.Name);
+        beerLog.Latitude = request.Location?.Latitude;
+        beerLog.Longitude = request.Location?.Longitude;
+        beerLog.DateLogged = request.DateLogged!.Value;
+        beerLog.BeerId = request.BeerId;
+
+        if (photo is not null)
+        {
+            beerLog.Photo = photo.Bytes;
+            beerLog.PhotoContentType = photo.ContentType;
+        }
+        else if (request.RemovePhoto)
+        {
+            beerLog.Photo = null;
+            beerLog.PhotoContentType = null;
+        }
+
+        await oelContext.SaveChangesAsync(cancellationToken);
+        return Ok(BeerLogResponse.FromEntity(beerLog));
     }
 
     [HttpPatch("{id:int}")]

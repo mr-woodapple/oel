@@ -18,3 +18,8 @@ export interface Beer {
 export type CreateBeerInput = Omit<Beer, "id" | "photoUrl"> & {
   photo: File | null;
 };
+
+export type UpdateBeerInput = CreateBeerInput & {
+  id: number;
+  removePhoto: boolean;
+};

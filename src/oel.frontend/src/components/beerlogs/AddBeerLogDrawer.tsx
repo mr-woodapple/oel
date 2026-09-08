@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
 import { useBeer } from "@/api/hooks/useBeer";
 import { useBeerLogs } from "@/api/hooks/useBeerLogs";
@@ -22,14 +22,20 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { localDateTimeToOffset, toLocalDateTimeInput } from "@/lib/beerFormatting";
-import { servingFormats, type CreateBeerLogInput } from "@/models/BeerLog";
+import {
+  servingFormats,
+  type BeerLog,
+  type BeerLogLocation,
+  type CreateBeerLogInput,
+  type UpdateBeerLogInput,
+} from "@/models/BeerLog";
 import { PhotoInput } from "@/components/shared/PhotoInput";
 import { LocationPicker } from "@/components/beerlogs/LocationPicker";
-import type { NewBeerLogLocation } from "@/models/BeerLog";
 
 type AddBeerLogDrawerProps = {
   open: boolean;
   initialBeerId?: number;
+  beerLog?: BeerLog;
   onOpenChange: (open: boolean) => void;
   onRequestAddBeer: () => void;
 };
@@ -45,17 +51,37 @@ const formatOptions = [
 export function AddBeerLogDrawer({
   open,
   initialBeerId,
+  beerLog,
   onOpenChange,
   onRequestAddBeer,
 }: AddBeerLogDrawerProps) {
   const { beers } = useBeer();
-  const { addBeerLog } = useBeerLogs();
-  const [selectedBeerId, setSelectedBeerId] = useState("");
-  const [rating, setRating] = useState("4");
-  const [format, setFormat] = useState(String(servingFormats.Draft));
-  const [location, setLocation] = useState<NewBeerLogLocation | null>(null);
-  const [dateLogged, setDateLogged] = useState(toLocalDateTimeInput);
+  const { addBeerLog, updateBeerLog } = useBeerLogs();
+  const [selectedBeerId, setSelectedBeerId] = useState(beerLog ? String(beerLog.beerId) : "");
+  const [rating, setRating] = useState(beerLog ? String(beerLog.rating) : "4");
+  const [format, setFormat] = useState(beerLog ? String(beerLog.format) : String(servingFormats.Draft));
+  const [location, setLocation] = useState<BeerLogLocation | null>(beerLog?.location ?? null);
+  const [dateLogged, setDateLogged] = useState(() => beerLog
+    ? toLocalDateTimeInput(new Date(beerLog.dateLogged))
+    : toLocalDateTimeInput());
   const [photo, setPhoto] = useState<File | null>(null);
+  const [removePhoto, setRemovePhoto] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+
+    // Opening starts a fresh create/edit session with the current source data.
+    // oxlint-disable-next-line react/set-state-in-effect
+    setSelectedBeerId(beerLog ? String(beerLog.beerId) : "");
+    setRating(beerLog ? String(beerLog.rating) : "4");
+    setFormat(beerLog ? String(beerLog.format) : String(servingFormats.Draft));
+    setLocation(beerLog?.location ?? null);
+    setDateLogged(beerLog
+      ? toLocalDateTimeInput(new Date(beerLog.dateLogged))
+      : toLocalDateTimeInput());
+    setPhoto(null);
+    setRemovePhoto(false);
+  }, [beerLog, open]);
 
   const beerId = selectedBeerId || (initialBeerId ? String(initialBeerId) : "");
 
@@ -70,22 +96,31 @@ export function AddBeerLogDrawer({
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const newBeerLog: CreateBeerLogInput = {
+    const displayedOriginalDate = beerLog
+      ? toLocalDateTimeInput(new Date(beerLog.dateLogged))
+      : null;
+    const beerLogInput: CreateBeerLogInput = {
       beerId: Number(beerId),
       rating: Number(rating),
       format: Number(format) as CreateBeerLogInput["format"],
       location,
-      dateLogged: localDateTimeToOffset(dateLogged),
+      dateLogged: beerLog && dateLogged === displayedOriginalDate
+        ? beerLog.dateLogged
+        : localDateTimeToOffset(dateLogged),
       photo,
     };
 
     try {
-      await addBeerLog.mutateAsync(newBeerLog);
-      setRating("4");
-      setFormat(String(servingFormats.Draft));
-      setLocation(null);
-      setDateLogged(toLocalDateTimeInput());
-      setPhoto(null);
+      if (beerLog) {
+        const update: UpdateBeerLogInput = {
+          ...beerLogInput,
+          id: beerLog.id,
+          removePhoto,
+        };
+        await updateBeerLog.mutateAsync(update);
+      } else {
+        await addBeerLog.mutateAsync(beerLogInput);
+      }
       handleOpenChange(false);
     } catch {
       // The mutation displays the user-facing error toast.
@@ -98,9 +133,11 @@ export function AddBeerLogDrawer({
     <Drawer open={open} onOpenChange={handleOpenChange} swipeDirection="down">
       <DrawerContent>
         <DrawerHeader>
-          <DrawerTitle>Bier-Log hinzufügen</DrawerTitle>
+          <DrawerTitle>{beerLog ? "Bier-Log bearbeiten" : "Bier-Log hinzufügen"}</DrawerTitle>
           <DrawerDescription>
-            Halte fest, wann, wo und wie dir das Bier geschmeckt hat.
+            {beerLog
+              ? "Passe die Angaben zu diesem Bier-Log an."
+              : "Halte fest, wann, wo und wie dir das Bier geschmeckt hat."}
           </DrawerDescription>
         </DrawerHeader>
 
@@ -123,7 +160,7 @@ export function AddBeerLogDrawer({
         ) : (
           <>
             <form
-              id="add-beer-log-form"
+              id="beer-log-form"
               className="flex flex-1 flex-col gap-6 overflow-y-auto p-4"
               onSubmit={handleSubmit}
             >
@@ -190,15 +227,24 @@ export function AddBeerLogDrawer({
                 />
               </div>
 
-              <PhotoInput id="beer-log-photo" photo={photo} onChange={setPhoto} />
+              <PhotoInput
+                id="beer-log-photo"
+                photo={photo}
+                onChange={setPhoto}
+                existingPhotoUrl={beerLog?.photoUrl}
+                existingPhotoRemoved={removePhoto}
+                onExistingPhotoRemovedChange={setRemovePhoto}
+              />
             </form>
             <DrawerFooter>
               <Button
                 type="submit"
-                form="add-beer-log-form"
-                disabled={!beerId || addBeerLog.isPending || beers.isError}
+                form="beer-log-form"
+                disabled={!beerId || addBeerLog.isPending || updateBeerLog.isPending || beers.isError}
               >
-                {addBeerLog.isPending ? "Wird gespeichert …" : "Log speichern"}
+                {addBeerLog.isPending || updateBeerLog.isPending
+                  ? "Wird gespeichert …"
+                  : beerLog ? "Änderungen speichern" : "Log speichern"}
               </Button>
               <DrawerClose render={<Button type="button" variant="outline" />}>
                 Abbrechen

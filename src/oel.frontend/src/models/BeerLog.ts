@@ -16,12 +16,6 @@ export interface BeerLogLocation {
   longitude: number | null;
 }
 
-export interface NewBeerLogLocation {
-  name: string | null;
-  latitude: number;
-  longitude: number;
-}
-
 export interface BeerLog {
   id: number;
   rating: number;
@@ -34,6 +28,11 @@ export interface BeerLog {
 }
 
 export type CreateBeerLogInput = Omit<BeerLog, "id" | "beer" | "location" | "photoUrl"> & {
-  location: NewBeerLogLocation | null;
+  location: BeerLogLocation | null;
   photo: File | null;
+};
+
+export type UpdateBeerLogInput = Omit<BeerLog, "beer" | "photoUrl"> & {
+  photo: File | null;
+  removePhoto: boolean;
 };

@@ -13,11 +13,11 @@ import {
 } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { NewBeerLogLocation } from "@/models/BeerLog";
+import type { BeerLogLocation } from "@/models/BeerLog";
 
 type LocationPickerProps = {
-  value: NewBeerLogLocation | null;
-  onChange: (location: NewBeerLogLocation | null) => void;
+  value: BeerLogLocation | null;
+  onChange: (location: BeerLogLocation | null) => void;
 };
 
 export function LocationPicker({ value, onChange }: LocationPickerProps) {
@@ -30,8 +30,8 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
 
   function openCoordinateDrawer() {
     setName(value?.name ?? "");
-    setLatitude(value ? String(value.latitude) : "");
-    setLongitude(value ? String(value.longitude) : "");
+    setLatitude(value?.latitude === null || value?.latitude === undefined ? "" : String(value.latitude));
+    setLongitude(value?.longitude === null || value?.longitude === undefined ? "" : String(value.longitude));
     setCoordinateDrawerOpen(true);
   }
 
@@ -94,7 +94,9 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
                 {value.name ?? "Gespeicherte Koordinaten"}
               </p>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                {value.latitude.toFixed(5)}, {value.longitude.toFixed(5)}
+                {value.latitude !== null && value.longitude !== null
+                  ? `${value.latitude.toFixed(5)}, ${value.longitude.toFixed(5)}`
+                  : "Koordinaten nicht verfügbar"}
               </p>
             </div>
             <Button
