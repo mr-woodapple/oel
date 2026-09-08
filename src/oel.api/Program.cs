@@ -10,10 +10,31 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<OelContext>(
     options => options.UseSqlServer(builder.Configuration.GetConnectionString("DatabaseConnection")));
 
+// Configuring CORS (only for local development)
+#if DEBUG
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("OelFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
+#endif
+
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
 WebApplication app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+    app.UseCors("OelFrontend");
+}
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
