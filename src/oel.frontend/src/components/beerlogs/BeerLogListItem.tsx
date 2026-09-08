@@ -10,7 +10,7 @@ import {
   ItemMedia,
   ItemTitle,
 } from "@/components/ui/item";
-import { formatLogDate, formatServingFormat } from "@/lib/beerFormatting";
+import { formatLocation, formatLogDate, formatServingFormat } from "@/lib/beerFormatting";
 import type { Beer } from "@/models/Beer";
 import type { BeerLog } from "@/models/BeerLog";
 import { Rating } from "@/components/beerlogs/Rating";
@@ -45,7 +45,7 @@ export function BeerLogListItem({ log, beer }: BeerLogListItemProps) {
           {formatLogDate(log.dateLogged)}
           {log.location && (
             <span className="mt-1 flex items-center gap-1">
-              <MapPin className="size-3.5" /> {log.location}
+              <MapPin className="size-3.5" /> {formatLocation(log.location)}
             </span>
           )}
         </ItemDescription>

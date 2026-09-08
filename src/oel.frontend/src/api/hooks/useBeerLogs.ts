@@ -46,7 +46,13 @@ function createBeerLogFormData(beerLog: CreateBeerLogInput) {
   formData.append("format", String(beerLog.format));
   formData.append("dateLogged", beerLog.dateLogged);
 
-  if (beerLog.location !== null) formData.append("location", beerLog.location);
+  if (beerLog.location !== null) {
+    formData.append("location.latitude", String(beerLog.location.latitude));
+    formData.append("location.longitude", String(beerLog.location.longitude));
+    if (beerLog.location.name !== null) {
+      formData.append("location.name", beerLog.location.name);
+    }
+  }
   if (beerLog.photo !== null) formData.append("photo", beerLog.photo);
 
   return formData;

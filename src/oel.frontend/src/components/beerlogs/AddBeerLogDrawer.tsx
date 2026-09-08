@@ -24,6 +24,8 @@ import {
 import { localDateTimeToOffset, toLocalDateTimeInput } from "@/lib/beerFormatting";
 import { servingFormats, type CreateBeerLogInput } from "@/models/BeerLog";
 import { PhotoInput } from "@/components/shared/PhotoInput";
+import { LocationPicker } from "@/components/beerlogs/LocationPicker";
+import type { NewBeerLogLocation } from "@/models/BeerLog";
 
 type AddBeerLogDrawerProps = {
   open: boolean;
@@ -51,7 +53,7 @@ export function AddBeerLogDrawer({
   const [selectedBeerId, setSelectedBeerId] = useState("");
   const [rating, setRating] = useState("4");
   const [format, setFormat] = useState(String(servingFormats.Draft));
-  const [location, setLocation] = useState("");
+  const [location, setLocation] = useState<NewBeerLogLocation | null>(null);
   const [dateLogged, setDateLogged] = useState(toLocalDateTimeInput);
   const [photo, setPhoto] = useState<File | null>(null);
 
@@ -72,7 +74,7 @@ export function AddBeerLogDrawer({
       beerId: Number(beerId),
       rating: Number(rating),
       format: Number(format) as CreateBeerLogInput["format"],
-      location: location.trim() || null,
+      location,
       dateLogged: localDateTimeToOffset(dateLogged),
       photo,
     };
@@ -81,7 +83,7 @@ export function AddBeerLogDrawer({
       await addBeerLog.mutateAsync(newBeerLog);
       setRating("4");
       setFormat(String(servingFormats.Draft));
-      setLocation("");
+      setLocation(null);
       setDateLogged(toLocalDateTimeInput());
       setPhoto(null);
       handleOpenChange(false);
@@ -174,16 +176,7 @@ export function AddBeerLogDrawer({
                 </div>
               </div>
 
-              <div className="grid gap-2">
-                <Label className="text-sm font-medium text-foreground" htmlFor="log-location">Ort</Label>
-                <Input
-                  id="log-location"
-                  className="h-11 rounded-xl text-base"
-                  placeholder="z. B. Mikkeller Bar"
-                  value={location}
-                  onChange={(event) => setLocation(event.target.value)}
-                />
-              </div>
+              <LocationPicker value={location} onChange={setLocation} />
 
               <div className="grid gap-2">
                 <Label className="text-sm font-medium text-foreground" htmlFor="log-date">Datum und Uhrzeit*</Label>

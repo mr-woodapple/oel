@@ -6,7 +6,7 @@ public sealed record BeerLogResponse(
     int Id,
     double Rating,
     Enums.ServingFormats Format,
-    string? Location,
+    BeerLogLocationResponse? Location,
     DateTimeOffset DateLogged,
     int BeerId,
     string? PhotoUrl)
@@ -15,8 +15,22 @@ public sealed record BeerLogResponse(
         beerLog.Id,
         beerLog.Rating,
         beerLog.Format,
-        beerLog.Location,
+        BeerLogLocationResponse.FromEntity(beerLog),
         beerLog.DateLogged,
         beerLog.BeerId,
         beerLog.Photo is null ? null : $"/api/beerlog/{beerLog.Id}/photo");
+}
+
+public sealed record BeerLogLocationResponse(
+    string? Name,
+    double? Latitude,
+    double? Longitude)
+{
+    public static BeerLogLocationResponse? FromEntity(BeerLog beerLog) =>
+        beerLog.LocationName is null && beerLog.Latitude is null && beerLog.Longitude is null
+            ? null
+            : new BeerLogLocationResponse(
+                beerLog.LocationName,
+                beerLog.Latitude,
+                beerLog.Longitude);
 }

@@ -8,7 +8,7 @@ import { ErrorState, ListSkeleton } from "@/components/shared/QueryState";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatLogDate, formatServingFormat } from "@/lib/beerFormatting";
+import { formatLocation, formatLogDate, formatServingFormat } from "@/lib/beerFormatting";
 
 export default function BeerLog() {
   const { beerLogId } = useParams();
@@ -81,7 +81,7 @@ export default function BeerLog() {
           <div>
             <p className="mb-2 text-sm font-medium text-muted-foreground">Ort</p>
             <p className="flex items-center gap-2 text-base text-foreground">
-              <MapPin className="size-4 text-primary" /> {log.location || "Nicht angegeben"}
+              <MapPin className="size-4 text-primary" /> {formatLocation(log.location)}
             </p>
           </div>
         </CardContent>

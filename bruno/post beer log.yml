@@ -12,9 +12,15 @@ http:
       - name: rating
         type: text
         value: "5"
-      - name: location
+      - name: location.name
         type: text
         value: Dahoam
+      - name: location.latitude
+        type: text
+        value: "48.13715"
+      - name: location.longitude
+        type: text
+        value: "11.57612"
       - name: beerId
         type: text
         value: "1"

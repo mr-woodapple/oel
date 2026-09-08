@@ -21,7 +21,9 @@ public class BeerLogController(OelContext oelContext) : ControllerBase
                 beerLog.Id,
                 beerLog.Rating,
                 beerLog.Format,
-                beerLog.Location,
+                beerLog.LocationName,
+                beerLog.Latitude,
+                beerLog.Longitude,
                 beerLog.DateLogged,
                 beerLog.BeerId,
                 HasPhoto = beerLog.Photo != null,
@@ -32,7 +34,12 @@ public class BeerLogController(OelContext oelContext) : ControllerBase
             beerLog.Id,
             beerLog.Rating,
             beerLog.Format,
-            beerLog.Location,
+            beerLog.LocationName is null && beerLog.Latitude is null && beerLog.Longitude is null
+                ? null
+                : new BeerLogLocationResponse(
+                    beerLog.LocationName,
+                    beerLog.Latitude,
+                    beerLog.Longitude),
             beerLog.DateLogged,
             beerLog.BeerId,
             beerLog.HasPhoto ? $"/api/beerlog/{beerLog.Id}/photo" : null)));
@@ -81,7 +88,9 @@ public class BeerLogController(OelContext oelContext) : ControllerBase
         {
             Rating = request.Rating,
             Format = request.Format,
-            Location = request.Location?.Trim(),
+            LocationName = NormalizeLocationName(request.Location?.Name),
+            Latitude = request.Location?.Latitude,
+            Longitude = request.Location?.Longitude,
             DateLogged = request.DateLogged!.Value,
             BeerId = request.BeerId,
             Photo = photo?.Bytes,
@@ -153,7 +162,9 @@ public class BeerLogController(OelContext oelContext) : ControllerBase
 
         if (request.Location is not null)
         {
-            beerLog.Location = request.Location.Trim();
+            beerLog.LocationName = NormalizeLocationName(request.Location.Name);
+            beerLog.Latitude = request.Location.Latitude;
+            beerLog.Longitude = request.Location.Longitude;
         }
 
         if (request.DateLogged is not null)
@@ -200,5 +211,11 @@ public class BeerLogController(OelContext oelContext) : ControllerBase
         await oelContext.SaveChangesAsync(cancellationToken);
 
         return NoContent();
+    }
+
+    private static string? NormalizeLocationName(string? name)
+    {
+        var normalized = name?.Trim();
+        return string.IsNullOrEmpty(normalized) ? null : normalized;
     }
 }
