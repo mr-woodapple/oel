@@ -10,4 +10,5 @@ public sealed class CreateBeerRequest
     public string? Appearance { get; init; }
     public string? TastingNotes { get; init; }
     public string? GeneralNotes { get; init; }
+    public IFormFile? Photo { get; init; }
 }

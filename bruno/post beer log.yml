@@ -7,15 +7,23 @@ http:
   method: POST
   url: "{{API_URL}}/beerlog"
   body:
-    type: json
-    data: |-
-      {
-        "rating": 5,
-        "location": "Dahoam",
-        "beerId": 1,
-        "format": 2,
-        "dateLogged": "2026-09-07T20:00:00+02:00"
-      }
+    type: multipart-form
+    data:
+      - name: rating
+        type: text
+        value: "5"
+      - name: location
+        type: text
+        value: Dahoam
+      - name: beerId
+        type: text
+        value: "1"
+      - name: format
+        type: text
+        value: "2"
+      - name: dateLogged
+        type: text
+        value: "2026-09-07T20:00:00+02:00"
   auth: inherit
 
 settings:
@@ -23,3 +31,6 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+
+docs: |-
+  To include an optional photo, add a multipart file field named `photo`.

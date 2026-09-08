@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Oel.Api.Contracts;
 using Oel.Api.Context;
 using Oel.Api.Models;
+using Oel.Api.Services;
 
 namespace Oel.Api.Controllers;
 
@@ -15,14 +16,31 @@ public class BeerLogController(OelContext oelContext) : ControllerBase
     {
         var logs = await oelContext.BeerLogs
             .AsNoTracking()
+            .Select(beerLog => new
+            {
+                beerLog.Id,
+                beerLog.Rating,
+                beerLog.Format,
+                beerLog.Location,
+                beerLog.DateLogged,
+                beerLog.BeerId,
+                HasPhoto = beerLog.Photo != null,
+            })
             .ToListAsync(cancellationToken);
 
-        return Ok(logs);
+        return Ok(logs.Select(beerLog => new BeerLogResponse(
+            beerLog.Id,
+            beerLog.Rating,
+            beerLog.Format,
+            beerLog.Location,
+            beerLog.DateLogged,
+            beerLog.BeerId,
+            beerLog.HasPhoto ? $"/api/beerlog/{beerLog.Id}/photo" : null)));
     }
 
     [HttpPost]
     public async Task<IActionResult> Post(
-        [FromBody] CreateBeerLogRequest request,
+        [FromForm] CreateBeerLogRequest request,
         CancellationToken cancellationToken)
     {
         if (request.Rating is < 0 or > 5)
@@ -48,6 +66,12 @@ public class BeerLogController(OelContext oelContext) : ControllerBase
             ModelState.AddModelError(nameof(request.BeerId), "Beer does not exist.");
         }
 
+        var (photo, photoError) = await PhotoUpload.ReadAsync(request.Photo, cancellationToken);
+        if (photoError is not null)
+        {
+            ModelState.AddModelError(nameof(request.Photo), photoError);
+        }
+
         if (!ModelState.IsValid)
         {
             return ValidationProblem(ModelState);
@@ -60,12 +84,33 @@ public class BeerLogController(OelContext oelContext) : ControllerBase
             Location = request.Location?.Trim(),
             DateLogged = request.DateLogged!.Value,
             BeerId = request.BeerId,
+            Photo = photo?.Bytes,
+            PhotoContentType = photo?.ContentType,
         };
 
         oelContext.BeerLogs.Add(beerLog);
         await oelContext.SaveChangesAsync(cancellationToken);
 
-        return Ok(beerLog);
+        return Ok(BeerLogResponse.FromEntity(beerLog));
+    }
+
+    [HttpGet("{id:int}/photo")]
+    public async Task<IActionResult> GetPhoto(int id, CancellationToken cancellationToken)
+    {
+        var photo = await oelContext.BeerLogs
+            .AsNoTracking()
+            .Where(beerLog => beerLog.Id == id)
+            .Select(beerLog => new { beerLog.Photo, beerLog.PhotoContentType })
+            .SingleOrDefaultAsync(cancellationToken);
+
+        if (photo?.Photo is null || photo.PhotoContentType is null)
+        {
+            return NotFound();
+        }
+
+        Response.Headers["X-Content-Type-Options"] = "nosniff";
+        Response.Headers.CacheControl = "private, max-age=3600";
+        return File(photo.Photo, photo.PhotoContentType);
     }
 
     [HttpPatch("{id:int}")]
@@ -137,7 +182,7 @@ public class BeerLogController(OelContext oelContext) : ControllerBase
         }
 
         await oelContext.SaveChangesAsync(cancellationToken);
-        return Ok(beerLog);
+        return Ok(BeerLogResponse.FromEntity(beerLog));
     }
 
     [HttpDelete("{id:int}")]

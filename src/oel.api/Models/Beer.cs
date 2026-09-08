@@ -1,5 +1,3 @@
-using System.Text.Json.Serialization;
-
 namespace Oel.Api.Models;
 
 public class Beer
@@ -18,6 +16,10 @@ public class Beer
     public string? TastingNotes { get; set; }
     public string? GeneralNotes { get; set; }
 
+    // Optional photo stored separately from normal API responses.
+    public byte[]? Photo { get; set; }
+    public string? PhotoContentType { get; set; }
+
     // Navigation property for Entity Framework
     // public ICollection<BeerLog> Logs { get; set; } = new List<BeerLog>();
-}   
+}

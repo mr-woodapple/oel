@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { PhotoInput } from "@/components/shared/PhotoInput";
 import { beerStyles } from "@/data/beerStyles";
 import type { CreateBeerInput } from "@/models/Beer";
 
@@ -43,6 +44,7 @@ const initialForm = {
 export function AddBeerDrawer({ open, onOpenChange }: AddBeerDrawerProps) {
   const { addBeer } = useBeer();
   const [form, setForm] = useState(initialForm);
+  const [photo, setPhoto] = useState<File | null>(null);
 
   function updateField(field: keyof typeof initialForm, value: string) {
     setForm((current) => ({ ...current, [field]: value }));
@@ -60,11 +62,13 @@ export function AddBeerDrawer({ open, onOpenChange }: AddBeerDrawerProps) {
       appearance: form.appearance.trim() || null,
       tastingNotes: form.tastingNotes.trim() || null,
       generalNotes: form.generalNotes.trim() || null,
+      photo,
     };
 
     try {
       await addBeer.mutateAsync(newBeer);
       setForm(initialForm);
+      setPhoto(null);
       onOpenChange(false);
     } catch {
       // The mutation displays the user-facing error toast.
@@ -150,6 +154,8 @@ export function AddBeerDrawer({ open, onOpenChange }: AddBeerDrawerProps) {
               />
             </FormField>
           </div>
+
+          <PhotoInput id="beer-photo" photo={photo} onChange={setPhoto} />
 
           <FormField label="Aussehen" htmlFor="beer-appearance">
             <Textarea

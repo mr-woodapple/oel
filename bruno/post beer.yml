@@ -7,13 +7,17 @@ http:
   method: POST
   url: "{{API_URL}}/beer"
   body:
-    type: json
-    data: |-
-      {
-        "name": "Testbier",
-        "brewery": "Testbrauerei",
-        "style": "Teststyle"
-      }
+    type: multipart-form
+    data:
+      - name: name
+        type: text
+        value: Testbier
+      - name: brewery
+        type: text
+        value: Testbrauerei
+      - name: style
+        type: text
+        value: Teststyle
   auth: inherit
 
 settings:
@@ -21,3 +25,6 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+
+docs: |-
+  To include an optional photo, add a multipart file field named `photo`.

@@ -43,9 +43,10 @@ app.MapGroup("/api").MapControllers();
 app.MapFallback("/api/{**path}", () => Results.NotFound());
 app.MapFallbackToFile("index.html");
 
-// Apply migrations automatically on startup
-using (IServiceScope scope = app.Services.CreateScope())
+// Apply migrations automatically on startup, but do not contact the database while EF tooling inspects the model.
+if (!EF.IsDesignTime)
 {
+    using IServiceScope scope = app.Services.CreateScope();
     Console.WriteLine("Applying migrations...");
     var db = scope.ServiceProvider.GetRequiredService<OelContext>();
     db.Database.Migrate();

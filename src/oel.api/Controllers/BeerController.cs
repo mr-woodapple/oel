@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Oel.Api.Contracts;
 using Oel.Api.Context;
 using Oel.Api.Models;
+using Oel.Api.Services;
 
 namespace Oel.Api.Controllers;
 
@@ -15,14 +16,37 @@ public class BeerController(OelContext oelContext) : ControllerBase
     {
         var beers = await oelContext.Beers
             .AsNoTracking()
+            .Select(beer => new
+            {
+                beer.Id,
+                beer.Name,
+                beer.Brewery,
+                beer.Style,
+                beer.Abv,
+                beer.Ibu,
+                beer.Appearance,
+                beer.TastingNotes,
+                beer.GeneralNotes,
+                HasPhoto = beer.Photo != null,
+            })
             .ToListAsync(cancellationToken);
 
-        return Ok(beers);
+        return Ok(beers.Select(beer => new BeerResponse(
+            beer.Id,
+            beer.Name,
+            beer.Brewery,
+            beer.Style,
+            beer.Abv,
+            beer.Ibu,
+            beer.Appearance,
+            beer.TastingNotes,
+            beer.GeneralNotes,
+            beer.HasPhoto ? $"/api/beer/{beer.Id}/photo" : null)));
     }
 
     [HttpPost]
     public async Task<IActionResult> Post(
-        [FromBody] CreateBeerRequest request,
+        [FromForm] CreateBeerRequest request,
         CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(request.Name))
@@ -50,6 +74,12 @@ public class BeerController(OelContext oelContext) : ControllerBase
             ModelState.AddModelError(nameof(request.Ibu), "IBU cannot be negative.");
         }
 
+        var (photo, photoError) = await PhotoUpload.ReadAsync(request.Photo, cancellationToken);
+        if (photoError is not null)
+        {
+            ModelState.AddModelError(nameof(request.Photo), photoError);
+        }
+
         if (!ModelState.IsValid)
         {
             return ValidationProblem(ModelState);
@@ -65,12 +95,33 @@ public class BeerController(OelContext oelContext) : ControllerBase
             Appearance = request.Appearance?.Trim(),
             TastingNotes = request.TastingNotes?.Trim(),
             GeneralNotes = request.GeneralNotes?.Trim(),
+            Photo = photo?.Bytes,
+            PhotoContentType = photo?.ContentType,
         };
 
         oelContext.Beers.Add(beer);
         await oelContext.SaveChangesAsync(cancellationToken);
 
-        return Ok(beer);
+        return Ok(BeerResponse.FromEntity(beer));
+    }
+
+    [HttpGet("{id:int}/photo")]
+    public async Task<IActionResult> GetPhoto(int id, CancellationToken cancellationToken)
+    {
+        var photo = await oelContext.Beers
+            .AsNoTracking()
+            .Where(beer => beer.Id == id)
+            .Select(beer => new { beer.Photo, beer.PhotoContentType })
+            .SingleOrDefaultAsync(cancellationToken);
+
+        if (photo?.Photo is null || photo.PhotoContentType is null)
+        {
+            return NotFound();
+        }
+
+        Response.Headers["X-Content-Type-Options"] = "nosniff";
+        Response.Headers.CacheControl = "private, max-age=3600";
+        return File(photo.Photo, photo.PhotoContentType);
     }
 
     [HttpPatch("{id:int}")]
@@ -168,7 +219,7 @@ public class BeerController(OelContext oelContext) : ControllerBase
         }
 
         await oelContext.SaveChangesAsync(cancellationToken);
-        return Ok(beer);
+        return Ok(BeerResponse.FromEntity(beer));
     }
 
     [HttpDelete("{id:int}")]

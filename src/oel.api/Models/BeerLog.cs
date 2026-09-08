@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using Oel.Api.Enums;
 
 namespace Oel.Api.Models;
@@ -14,6 +13,10 @@ public class BeerLog
     public ServingFormats Format { get; set; }
     public string? Location { get; set; }
     public DateTimeOffset DateLogged { get; set; }
+
+    // Optional photo stored separately from normal API responses.
+    public byte[]? Photo { get; set; }
+    public string? PhotoContentType { get; set; }
 
     // Foreign Key to the Beer
     public int BeerId { get; set; }

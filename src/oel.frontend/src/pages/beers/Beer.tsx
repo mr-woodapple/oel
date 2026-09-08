@@ -61,6 +61,14 @@ export default function Beer() {
         </Button>
       </header>
 
+      {beer.photoUrl && (
+        <img
+          src={beer.photoUrl}
+          alt={`${beer.name} von ${beer.brewery}`}
+          className="mt-6 aspect-[16/9] max-h-[32rem] w-full rounded-2xl border bg-muted object-cover shadow-sm"
+        />
+      )}
+
       <div className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.7fr)]">
         <section className="grid content-start gap-5" aria-label="Bierdetails">
           <Card className="rounded-2xl text-base shadow-sm">

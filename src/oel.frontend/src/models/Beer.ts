@@ -12,6 +12,9 @@ export interface Beer {
   appearance: string | null,
   tastingNotes: string | null,
   generalNotes: string | null,
+  photoUrl: string | null,
 }
 
-export type CreateBeerInput = Omit<Beer, "id">;
+export type CreateBeerInput = Omit<Beer, "id" | "photoUrl"> & {
+  photo: File | null;
+};

@@ -24,7 +24,7 @@ export function useBeer() {
     mutationFn: (newBeer: CreateBeerInput) =>
       fetchApi<Beer>(BEER_API_ROUTE, {
         method: "POST",
-        body: JSON.stringify(newBeer),
+        body: createBeerFormData(newBeer),
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: beerKeys.all });
@@ -39,4 +39,20 @@ export function useBeer() {
     beers,
     addBeer
   };
+}
+
+function createBeerFormData(beer: CreateBeerInput) {
+  const formData = new FormData();
+  formData.append("name", beer.name);
+  formData.append("brewery", beer.brewery);
+  formData.append("style", beer.style);
+
+  if (beer.abv !== null) formData.append("abv", String(beer.abv));
+  if (beer.ibu !== null) formData.append("ibu", String(beer.ibu));
+  if (beer.appearance !== null) formData.append("appearance", beer.appearance);
+  if (beer.tastingNotes !== null) formData.append("tastingNotes", beer.tastingNotes);
+  if (beer.generalNotes !== null) formData.append("generalNotes", beer.generalNotes);
+  if (beer.photo !== null) formData.append("photo", beer.photo);
+
+  return formData;
 }

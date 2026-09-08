@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { localDateTimeToOffset, toLocalDateTimeInput } from "@/lib/beerFormatting";
 import { servingFormats, type CreateBeerLogInput } from "@/models/BeerLog";
+import { PhotoInput } from "@/components/shared/PhotoInput";
 
 type AddBeerLogDrawerProps = {
   open: boolean;
@@ -52,6 +53,7 @@ export function AddBeerLogDrawer({
   const [format, setFormat] = useState(String(servingFormats.Draft));
   const [location, setLocation] = useState("");
   const [dateLogged, setDateLogged] = useState(toLocalDateTimeInput);
+  const [photo, setPhoto] = useState<File | null>(null);
 
   const beerId = selectedBeerId || (initialBeerId ? String(initialBeerId) : "");
 
@@ -72,6 +74,7 @@ export function AddBeerLogDrawer({
       format: Number(format) as CreateBeerLogInput["format"],
       location: location.trim() || null,
       dateLogged: localDateTimeToOffset(dateLogged),
+      photo,
     };
 
     try {
@@ -80,6 +83,7 @@ export function AddBeerLogDrawer({
       setFormat(String(servingFormats.Draft));
       setLocation("");
       setDateLogged(toLocalDateTimeInput());
+      setPhoto(null);
       handleOpenChange(false);
     } catch {
       // The mutation displays the user-facing error toast.
@@ -192,6 +196,8 @@ export function AddBeerLogDrawer({
                   required
                 />
               </div>
+
+              <PhotoInput id="beer-log-photo" photo={photo} onChange={setPhoto} />
             </form>
             <DrawerFooter>
               <Button
