@@ -51,6 +51,14 @@ export default function BeerLog() {
         {beer && <p className="mt-2 text-base text-muted-foreground">{beer.brewery} · {beer.style}</p>}
       </header>
 
+      {log.photoUrl && (
+        <img
+          src={log.photoUrl}
+          alt={`Foto zum Bier-Log${beer ? ` von ${beer.name}` : ""}`}
+          className="mt-6 aspect-[16/9] max-h-[32rem] w-full rounded-2xl border bg-muted object-cover shadow-sm"
+        />
+      )}
+
       <Card className="mt-6 rounded-2xl text-base shadow-sm">
         <CardHeader>
           <CardTitle className="text-lg">Verkostung</CardTitle>

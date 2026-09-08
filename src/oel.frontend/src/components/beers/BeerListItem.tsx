@@ -23,8 +23,12 @@ export function BeerListItem({ beer }: BeerListItemProps) {
       variant="outline"
       className="rounded-2xl bg-card p-4 text-base shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md sm:p-5"
     >
-      <ItemMedia className="flex size-11 items-center justify-center rounded-xl bg-primary/15 text-primary">
-        <BeerIcon className="size-5" />
+      <ItemMedia className="flex size-14 items-center justify-center overflow-hidden rounded-xl bg-primary/15 text-primary">
+        {beer.photoUrl ? (
+          <img src={beer.photoUrl} alt="" className="size-full object-cover" loading="lazy" />
+        ) : (
+          <BeerIcon className="size-5" />
+        )}
       </ItemMedia>
       <ItemContent className="min-w-0 gap-1.5 text-left">
         <ItemTitle className="text-base font-semibold text-foreground">{beer.name}</ItemTitle>

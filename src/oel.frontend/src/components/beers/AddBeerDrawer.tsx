@@ -3,11 +3,13 @@ import { useState, type FormEvent } from "react";
 import { useBeer } from "@/api/hooks/useBeer";
 import {
   Drawer,
+  DrawerClose,
   DrawerContent,
   DrawerDescription,
-  DrawerHeading,
+  DrawerFooter,
+  DrawerHeader,
   DrawerTitle,
-} from "@/components/shared/GenericDrawer";
+} from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { PhotoInput } from "@/components/shared/PhotoInput";
 import { beerStyles } from "@/data/beerStyles";
 import type { CreateBeerInput } from "@/models/Beer";
 
@@ -41,6 +44,7 @@ const initialForm = {
 export function AddBeerDrawer({ open, onOpenChange }: AddBeerDrawerProps) {
   const { addBeer } = useBeer();
   const [form, setForm] = useState(initialForm);
+  const [photo, setPhoto] = useState<File | null>(null);
 
   function updateField(field: keyof typeof initialForm, value: string) {
     setForm((current) => ({ ...current, [field]: value }));
@@ -58,11 +62,13 @@ export function AddBeerDrawer({ open, onOpenChange }: AddBeerDrawerProps) {
       appearance: form.appearance.trim() || null,
       tastingNotes: form.tastingNotes.trim() || null,
       generalNotes: form.generalNotes.trim() || null,
+      photo,
     };
 
     try {
       await addBeer.mutateAsync(newBeer);
       setForm(initialForm);
+      setPhoto(null);
       onOpenChange(false);
     } catch {
       // The mutation displays the user-facing error toast.
@@ -70,16 +76,20 @@ export function AddBeerDrawer({ open, onOpenChange }: AddBeerDrawerProps) {
   }
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
+    <Drawer open={open} onOpenChange={onOpenChange} swipeDirection="down">
       <DrawerContent>
-        <DrawerHeading className="border-b border-border/70">
-          <DrawerTitle className="text-left text-xl font-semibold text-foreground">Bier hinzufügen</DrawerTitle>
-          <DrawerDescription className="mt-1 text-left text-sm text-muted-foreground">
+        <DrawerHeader>
+          <DrawerTitle>Bier hinzufügen</DrawerTitle>
+          <DrawerDescription>
             Lege die Stammdaten und deine ersten Eindrücke fest.
           </DrawerDescription>
-        </DrawerHeading>
+        </DrawerHeader>
 
-        <form className="flex flex-col gap-6 px-5 pb-8 pt-5 text-left" onSubmit={handleSubmit}>
+        <form
+          id="add-beer-form"
+          className="flex flex-1 flex-col gap-6 overflow-y-auto p-4"
+          onSubmit={handleSubmit}
+        >
           <div className="grid gap-4 sm:grid-cols-2">
             <FormField label="Name" htmlFor="beer-name" required>
               <Input
@@ -145,6 +155,8 @@ export function AddBeerDrawer({ open, onOpenChange }: AddBeerDrawerProps) {
             </FormField>
           </div>
 
+          <PhotoInput id="beer-photo" photo={photo} onChange={setPhoto} />
+
           <FormField label="Aussehen" htmlFor="beer-appearance">
             <Textarea
               id="beer-appearance"
@@ -171,16 +183,16 @@ export function AddBeerDrawer({ open, onOpenChange }: AddBeerDrawerProps) {
               onChange={(event) => updateField("generalNotes", event.target.value)}
             />
           </FormField>
-
-          <div className="sticky bottom-0 -mx-5 mt-1 flex gap-3 border-t bg-background/95 px-5 pt-4 backdrop-blur">
-            <Button type="button" variant="outline" className="h-11 flex-1 rounded-xl text-sm" onClick={() => onOpenChange(false)}>
-              Abbrechen
-            </Button>
-            <Button type="submit" className="h-11 flex-1 rounded-xl text-sm" disabled={!form.style || addBeer.isPending}>
-              {addBeer.isPending ? "Wird gespeichert …" : "Bier speichern"}
-            </Button>
-          </div>
         </form>
+
+        <DrawerFooter>
+          <Button type="submit" form="add-beer-form" disabled={!form.style || addBeer.isPending}>
+            {addBeer.isPending ? "Wird gespeichert …" : "Bier speichern"}
+          </Button>
+          <DrawerClose render={<Button type="button" variant="outline" />}>
+            Abbrechen
+          </DrawerClose>
+        </DrawerFooter>
       </DrawerContent>
     </Drawer>
   );

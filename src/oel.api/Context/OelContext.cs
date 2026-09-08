@@ -11,5 +11,13 @@ public class OelContext(DbContextOptions<OelContext> options) : DbContext(option
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<Beer>()
+            .Property(beer => beer.PhotoContentType)
+            .HasMaxLength(50);
+
+        modelBuilder.Entity<BeerLog>()
+            .Property(beerLog => beerLog.PhotoContentType)
+            .HasMaxLength(50);
     }
 }

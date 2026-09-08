@@ -21,7 +21,7 @@ export function useBeerLogs() {
     mutationFn: (newBeerLog: CreateBeerLogInput) =>
       fetchApi<BeerLog>(BEER_LOG_API_ROUTE, {
         method: "POST",
-        body: JSON.stringify(newBeerLog),
+        body: createBeerLogFormData(newBeerLog),
       }),
     onSuccess: (_createdLog, variables) => {
       queryClient.invalidateQueries({ queryKey: beerLogKeys.all });
@@ -37,4 +37,17 @@ export function useBeerLogs() {
     beerLogs,
     addBeerLog,
   };
+}
+
+function createBeerLogFormData(beerLog: CreateBeerLogInput) {
+  const formData = new FormData();
+  formData.append("beerId", String(beerLog.beerId));
+  formData.append("rating", String(beerLog.rating));
+  formData.append("format", String(beerLog.format));
+  formData.append("dateLogged", beerLog.dateLogged);
+
+  if (beerLog.location !== null) formData.append("location", beerLog.location);
+  if (beerLog.photo !== null) formData.append("photo", beerLog.photo);
+
+  return formData;
 }

@@ -18,6 +18,9 @@ export interface BeerLog {
   dateLogged: string;
   beerId: number;
   beer?: Beer | null;
+  photoUrl: string | null;
 }
 
-export type CreateBeerLogInput = Omit<BeerLog, "id" | "beer">;
+export type CreateBeerLogInput = Omit<BeerLog, "id" | "beer" | "photoUrl"> & {
+  photo: File | null;
+};

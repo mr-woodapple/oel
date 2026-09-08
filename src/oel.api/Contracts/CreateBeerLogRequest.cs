@@ -9,4 +9,5 @@ public sealed class CreateBeerLogRequest
     public string? Location { get; init; }
     public DateTimeOffset? DateLogged { get; init; }
     public int BeerId { get; init; }
+    public IFormFile? Photo { get; init; }
 }
