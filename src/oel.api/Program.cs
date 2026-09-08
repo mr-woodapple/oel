@@ -1,10 +1,21 @@
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
+using Oel.Api.Binding;
 using Oel.Api.Context;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    var formValueProviderIndex = options.ValueProviderFactories
+        .Select((factory, index) => (factory, index))
+        .Single(item => item.factory is FormValueProviderFactory)
+        .index;
+
+    options.ValueProviderFactories[formValueProviderIndex] =
+        new InvariantCultureFormValueProviderFactory();
+});
 
 // Configure database connection
 builder.Services.AddDbContext<OelContext>(
