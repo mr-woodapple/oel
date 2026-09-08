@@ -104,22 +104,26 @@ export function PhotoInput({
           </Button>
         </div>
       )}
-      <div className="relative">
-        <ImagePlus className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          ref={inputRef}
-          id={id}
-          type="file"
-          accept="image/jpeg,image/png,image/webp,image/gif,image/avif,image/heic,image/heif"
-          className="h-11 rounded-xl pl-10 text-base file:mr-3"
-          onChange={handleChange}
-          aria-describedby={`${id}-help${error ? ` ${id}-error` : ""}`}
-          aria-invalid={Boolean(error)}
-        />
-      </div>
-      <p id={`${id}-help`} className="text-xs text-muted-foreground">
-        {existingPhotoUrl ? "Optional · neues Foto ersetzt das vorhandene · maximal 10 MB" : "Optional · maximal 10 MB"}
-      </p>
+      {!displayedPhotoUrl && (
+        <>
+          <div className="relative">
+            <ImagePlus className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              ref={inputRef}
+              id={id}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif,image/avif,image/heic,image/heif"
+              className="h-11 rounded-xl pl-10 text-base file:mr-3"
+              onChange={handleChange}
+              aria-describedby={`${id}-help${error ? ` ${id}-error` : ""}`}
+              aria-invalid={Boolean(error)}
+            />
+          </div>
+          <p id={`${id}-help`} className="text-xs text-muted-foreground">
+            Optional · maximal 10 MB
+          </p>
+        </>
+      )}
       {error && <p id={`${id}-error`} className="text-sm text-destructive">{error}</p>}
     </div>
   );
