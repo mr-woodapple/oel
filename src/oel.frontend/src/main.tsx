@@ -14,6 +14,7 @@ import NotFound from '@/pages/NotFound'
 import Home from '@/pages/Home'
 import Beer from '@/pages/beers/Beer'
 import BeerLog from '@/pages/beerlogs/BeerLog'
+import MapRoute from '@/pages/MapRoute'
 
 const queryClient = new QueryClient()
 
@@ -29,6 +30,10 @@ createRoot(document.getElementById('root')!).render(
             <Route path='beers/:beerId' element={<Beer />} />
             <Route path='logs' element={<BeerLogs />} />
             <Route path='logs/:beerLogId' element={<BeerLog />} />
+            <Route
+              path='map'
+              element={<MapRoute />}
+            />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>

@@ -1,5 +1,5 @@
 import { NavLink } from "react-router";
-import { Beer, ClipboardList, House, Plus } from "lucide-react";
+import { Beer, ClipboardList, House, Map as MapIcon, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -11,7 +11,7 @@ export default function BottomBar({ onAddClick }: BottomBarProps) {
 
   return (
     <div className="pb-[env(safe-area-inset-bottom)] z-50 w-full bg-white border-t border-gray-200">
-      <div className="h-16 grid grid-cols-4 items-center justify-items-center">
+      <div className="grid h-16 grid-cols-5 items-center justify-items-center">
 
         <NavLink to="/" end aria-label="Übersicht">
           {({ isActive }) => <BottomBarButton isActive={isActive} iconName="home" />}
@@ -25,6 +25,10 @@ export default function BottomBar({ onAddClick }: BottomBarProps) {
           {({ isActive }) => <BottomBarButton isActive={isActive} iconName="logs" />}
         </NavLink>
 
+        <NavLink to="/map" aria-label="Karte">
+          {({ isActive }) => <BottomBarButton isActive={isActive} iconName="map" />}
+        </NavLink>
+
         <Button size="icon" onClick={onAddClick} aria-label="Hinzufügen">
           <Plus />
         </Button>
@@ -36,7 +40,7 @@ export default function BottomBar({ onAddClick }: BottomBarProps) {
 
 type BottomBarButtonProps = {
   isActive?: boolean
-  iconName: "home" | "beers" | "logs"
+  iconName: "home" | "beers" | "logs" | "map"
 }
 
 function BottomBarButton({ isActive, iconName }: BottomBarButtonProps) {
@@ -47,6 +51,7 @@ function BottomBarButton({ isActive, iconName }: BottomBarButtonProps) {
       {iconName === "home" && <House {...props} />}
       {iconName === "beers" && <Beer {...props} />}
       {iconName === "logs" && <ClipboardList {...props} />}
+      {iconName === "map" && <MapIcon {...props} />}
     </Button>
   )
 }
