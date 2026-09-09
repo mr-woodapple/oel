@@ -49,10 +49,26 @@ export function useBeerLogs() {
     },
   });
 
+  const deleteBeerLog = useMutation({
+    mutationFn: (beerLog: BeerLog) =>
+      fetchApi<void>(`${BEER_LOG_API_ROUTE}/${beerLog.id}`, {
+        method: "DELETE",
+      }),
+    onSuccess: (_response, beerLog) => {
+      queryClient.invalidateQueries({ queryKey: beerLogKeys.all });
+      queryClient.invalidateQueries({ queryKey: ["beers", "detail", beerLog.beerId] });
+      toast.success("Bier-Log gelöscht");
+    },
+    onError: () => {
+      toast.error("Bier-Log konnte nicht gelöscht werden");
+    },
+  });
+
   return {
     beerLogs,
     addBeerLog,
     updateBeerLog,
+    deleteBeerLog,
   };
 }
 

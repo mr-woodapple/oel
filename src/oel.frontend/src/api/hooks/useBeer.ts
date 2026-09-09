@@ -2,6 +2,7 @@ import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { BEER_API_ROUTE, beerKeys } from "../queries/beerQueries";
+import { beerLogKeys } from "../queries/beerLogQueries";
 import { fetchApi } from "../api";
 import type { Beer, CreateBeerInput, UpdateBeerInput } from "@/models/Beer";
 
@@ -50,10 +51,26 @@ export function useBeer() {
     },
   });
 
+  const deleteBeer = useMutation({
+    mutationFn: (beer: Beer) =>
+      fetchApi<void>(`${BEER_API_ROUTE}/${beer.id}`, {
+        method: "DELETE",
+      }),
+    onSuccess: (_response, beer) => {
+      queryClient.invalidateQueries({ queryKey: beerKeys.all });
+      queryClient.invalidateQueries({ queryKey: beerLogKeys.all });
+      toast.success(`${beer.name} gelöscht`);
+    },
+    onError: () => {
+      toast.error("Bier konnte nicht gelöscht werden");
+    },
+  });
+
   return {
     beers,
     addBeer,
     updateBeer,
+    deleteBeer,
   };
 }
 

@@ -1,9 +1,10 @@
 import { ArrowLeft, CalendarDays, MapPin, Pencil } from "lucide-react";
-import { Link, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 
 import { useBeer } from "@/api/hooks/useBeer";
 import { useBeerLogs } from "@/api/hooks/useBeerLogs";
 import { Rating } from "@/components/beerlogs/Rating";
+import { DeleteConfirmationDialog } from "@/components/shared/DeleteConfirmationDialog";
 import { ErrorState, ListSkeleton } from "@/components/shared/QueryState";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,12 +14,24 @@ import { useAppActions } from "@/contexts/appActions";
 
 export default function BeerLog() {
   const { beerLogId } = useParams();
+  const navigate = useNavigate();
   const numericLogId = Number(beerLogId);
   const { beers } = useBeer();
-  const { beerLogs } = useBeerLogs();
+  const { beerLogs, deleteBeerLog } = useBeerLogs();
   const { openEditBeerLog } = useAppActions();
   const log = beerLogs.data?.find((candidate) => candidate.id === numericLogId);
   const beer = beers.data?.find((candidate) => candidate.id === log?.beerId);
+
+  async function handleDelete() {
+    if (!log) return;
+
+    try {
+      await deleteBeerLog.mutateAsync(log);
+      navigate("/logs", { replace: true });
+    } catch {
+      // The mutation displays the user-facing error toast.
+    }
+  }
 
   if (beerLogs.isPending || beers.isPending) {
     return <main className="min-h-full px-4 py-6 sm:px-8 sm:py-10"><ListSkeleton /></main>;
@@ -53,9 +66,17 @@ export default function BeerLog() {
           </h1>
           {beer && <p className="mt-2 text-base text-muted-foreground">{beer.brewery} · {beer.style}</p>}
         </div>
-        <Button variant="outline" className="h-11 rounded-xl px-4 text-sm" onClick={() => openEditBeerLog(log)}>
-          <Pencil /> Bearbeiten
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <DeleteConfirmationDialog
+            title="Bier-Log endgültig löschen?"
+            description="Dieser Bier-Log wird dauerhaft gelöscht. Diese Aktion kann nicht rückgängig gemacht werden."
+            pending={deleteBeerLog.isPending}
+            onConfirm={handleDelete}
+          />
+          <Button variant="outline" className="h-11 rounded-xl px-4 text-sm" onClick={() => openEditBeerLog(log)}>
+            <Pencil /> Bearbeiten
+          </Button>
+        </div>
       </header>
 
       {log.photoUrl && (

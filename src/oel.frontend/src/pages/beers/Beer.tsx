@@ -1,9 +1,10 @@
 import { ArrowLeft, Beer as BeerIcon, Pencil, Plus } from "lucide-react";
-import { Link, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 
 import { useBeer } from "@/api/hooks/useBeer";
 import { useBeerLogs } from "@/api/hooks/useBeerLogs";
 import { BeerLogListItem } from "@/components/beerlogs/BeerLogListItem";
+import { DeleteConfirmationDialog } from "@/components/shared/DeleteConfirmationDialog";
 import { ErrorState, ListSkeleton } from "@/components/shared/QueryState";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,12 +14,24 @@ import { useAppActions } from "@/contexts/appActions";
 
 export default function Beer() {
   const { beerId } = useParams();
+  const navigate = useNavigate();
   const numericBeerId = Number(beerId);
-  const { beers } = useBeer();
+  const { beers, deleteBeer } = useBeer();
   const { beerLogs } = useBeerLogs();
   const { openAddBeerLog, openEditBeer } = useAppActions();
   const beer = beers.data?.find((candidate) => candidate.id === numericBeerId);
   const logs = beerLogs.data?.filter((log) => log.beerId === numericBeerId) ?? [];
+
+  async function handleDelete() {
+    if (!beer) return;
+
+    try {
+      await deleteBeer.mutateAsync(beer);
+      navigate("/beers", { replace: true });
+    } catch {
+      // The mutation displays the user-facing error toast.
+    }
+  }
 
   if (beers.isPending || beerLogs.isPending) {
     return <main className="min-h-full px-4 py-6 sm:px-8 sm:py-10"><ListSkeleton /></main>;
@@ -57,6 +70,12 @@ export default function Beer() {
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
+          <DeleteConfirmationDialog
+            title="Bier endgültig löschen?"
+            description={`„${beer.name}“ und ${logs.length === 1 ? "der zugehörige Bier-Log" : `alle ${logs.length} zugehörigen Bier-Logs`} werden dauerhaft gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.`}
+            pending={deleteBeer.isPending}
+            onConfirm={handleDelete}
+          />
           <Button variant="outline" className="h-11 rounded-xl px-4 text-sm" onClick={() => openEditBeer(beer)}>
             <Pencil /> Bearbeiten
           </Button>
