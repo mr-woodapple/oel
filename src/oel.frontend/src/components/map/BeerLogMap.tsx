@@ -100,7 +100,7 @@ export function BeerLogMap({ logs, beersById }: BeerLogMapProps) {
     <div
       ref={containerRef}
       className="h-full min-h-80 w-full bg-muted font-sans"
-      role="application"
+      role="region"
       aria-label={`Karte mit ${logs.length} ${logs.length === 1 ? "Bier-Log" : "Bier-Logs"}`}
     />
   );
@@ -116,11 +116,11 @@ function createPopup(log: BeerLog, beerName: string, openLog: () => void) {
 
   const details = document.createElement("span");
   details.className = "text-xs text-muted-foreground";
-  details.textContent = `${formatLogDate(log.dateLogged)} · ${formatLocation(log.location!)}`;
+  details.textContent = `${formatLogDate(log.dateLogged)} · ${formatLocation(log.location)}`;
 
   const button = document.createElement("button");
   button.type = "button";
-  button.className = "mt-1 w-fit cursor-pointer border-0 bg-transparent p-0 text-left text-xs font-semibold text-primary-foreground";
+  button.className = "mt-1 w-fit cursor-pointer border-0 bg-transparent p-0 text-left text-xs font-semibold text-primary";
   button.textContent = "Bier-Log öffnen";
   button.addEventListener("click", openLog);
 
