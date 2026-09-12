@@ -6,7 +6,7 @@ Oel is a personal beer-tracking application. Its main product areas are:
 
 1. **Beers** — a list of beers the user has tasted. Selecting a beer opens its detail view and shows every beer log associated with it.
 2. **Beer logs** — individual occasions on which the user had a beer, including a rating and contextual information.
-3. **Map** — a planned view showing where beers were consumed. This feature is not implemented yet; avoid inventing map or geocoding requirements unless the task calls for them.
+3. **Map** — a Leaflet view showing beer logs that have stored coordinates. Avoid inventing additional map or geocoding requirements unless the task calls for them.
 
 Keep the distinction between a beer and a beer log clear: a `Beer` describes the beverage, while a `BeerLog` describes one drinking occasion and belongs to a beer.
 
@@ -51,14 +51,17 @@ Keep the distinction between a beer and a beer log clear: a `Beer` describes the
 - Use TypeScript strictly. Avoid `any`; model API payloads explicitly and keep frontend types aligned with backend contracts.
 - Use the `@/` alias for imports from `src/`.
 - Put route-level screens in `src/pages/`, shared layout in `src/layouts/`, reusable application components in `src/components/`, and shadcn/ui primitives in `src/components/ui/`.
-- Prefer existing shadcn/ui components and established design tokens over one-off controls or hard-coded styles. Keep shared primitives generic; put beer-specific behavior in feature or page components.
+- Use Tailwind CSS v4 utility classes for application and component styling. Do not add project-authored custom CSS rules, component selectors, CSS modules, styled components, or inline style objects. Required vendor stylesheets, such as Leaflet's packaged CSS, may still be imported.
+- Use shadcn/ui components whenever a suitable component exists. Check `src/oel.frontend/src/components/ui/` first; if a component is not installed, consult its official shadcn component page and install it from `src/oel.frontend/` with the npm command shown there (typically `npx shadcn@latest add <component>`).
+- Follow each shadcn component page's documented composition and usage closely. Compose and customize shadcn components only through their supported props, Tailwind CSS v4 utility classes, and the existing design tokens; do not add custom CSS for them.
+- Keep shared primitives generic and put beer-specific behavior in feature or page components.
 - Define routes in the React Router tree and use links/navigation rather than full page reloads.
 - Route server state through TanStack Query. Keep query keys centralized, use the shared `fetchApi` wrapper, and invalidate the narrowest relevant keys after successful mutations.
 - Do not duplicate server state into local component state without a concrete UI reason. Use local state for transient UI concerns such as form input, dialog state, and filters.
 - Always handle loading, error, empty, and success states for API-backed views.
 - Keep the UI responsive and mobile-friendly. The bottom navigation is used on smaller screens; desktop behavior belongs in the shared layout.
 - Preserve the interface's existing language unless a task explicitly requests copy or localization changes.
-- For the future map feature, keep location data and presentation separable. Do not add a map provider, geocoder, API key, or coordinate model without an explicit requirement.
+- For map changes, keep location data and presentation separable. Do not add another map provider, a geocoder, an API key, or a new coordinate model without an explicit requirement.
 
 ### Frontend verification
 
