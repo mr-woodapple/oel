@@ -15,6 +15,9 @@ http:
       - name: brewery
         type: text
         value: Example Brewery
+      - name: countryCode
+        type: text
+        value: SE
       - name: style
         type: text
         value: IPA
@@ -42,5 +45,6 @@ settings:
   maxRedirects: 5
 
 docs: |-
+  `countryCode` is optional. Omitting it or sending an empty value clears the country.
   To replace the photo, add a multipart file field named `photo`.
   To remove the current photo, add `removePhoto` with the value `true`.

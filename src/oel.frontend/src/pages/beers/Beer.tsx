@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ItemGroup } from "@/components/ui/item";
 import { useAppActions } from "@/contexts/appActions";
+import { countryName } from "@/lib/countryFormatting";
 
 export default function Beer() {
   const { beerId } = useParams();
@@ -101,6 +102,7 @@ export default function Beer() {
             </CardHeader>
             <CardContent className="flex flex-wrap gap-2">
               <Badge className="rounded-full" variant="secondary">{beer.style}</Badge>
+              {beer.countryCode && <Badge className="rounded-full" variant="outline">{countryName(beer.countryCode)}</Badge>}
               {beer.abv !== null && <Badge className="rounded-full" variant="outline">{beer.abv}% vol.</Badge>}
               {beer.ibu !== null && <Badge className="rounded-full" variant="outline">{beer.ibu} IBU</Badge>}
             </CardContent>

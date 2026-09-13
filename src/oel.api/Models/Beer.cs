@@ -7,6 +7,7 @@ public class Beer
     // Core Identifiers
     public string Name { get; set; } = string.Empty;
     public string Brewery { get; set; } = string.Empty;
+    public string? CountryCode { get; set; }
     public string Style { get; set; } = string.Empty;
     public double? Abv { get; set; }
     public int? Ibu { get; set; }

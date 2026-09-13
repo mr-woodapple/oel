@@ -4,6 +4,8 @@ public sealed class BeerPatchRequest
 {
     public string? Name { get; init; }
     public string? Brewery { get; init; }
+    [CountryCode]
+    public string? CountryCode { get; init; }
     public string? Style { get; init; }
     public double? Abv { get; init; }
     public int? Ibu { get; init; }

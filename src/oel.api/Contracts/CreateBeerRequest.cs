@@ -4,6 +4,8 @@ public sealed class CreateBeerRequest
 {
     public string Name { get; init; } = string.Empty;
     public string Brewery { get; init; } = string.Empty;
+    [CountryCode]
+    public string? CountryCode { get; init; }
     public string Style { get; init; } = string.Empty;
     public double? Abv { get; init; }
     public int? Ibu { get; init; }
