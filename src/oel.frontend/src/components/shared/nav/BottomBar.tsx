@@ -10,7 +10,7 @@ type BottomBarProps = {
 export default function BottomBar({ onAddClick }: BottomBarProps) {
 
   return (
-    <div className="pb-[env(safe-area-inset-bottom)] z-50 w-full bg-white border-t border-gray-200">
+    <div className="pb-[env(safe-area-inset-bottom)] z-50 w-full shrink-0 bg-white border-t border-gray-200">
       <div className="grid h-16 grid-cols-5 items-center justify-items-center">
 
         <NavLink to="/" end aria-label="Übersicht">
