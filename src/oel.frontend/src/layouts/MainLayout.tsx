@@ -53,7 +53,7 @@ export default function MainLayout() {
 
   return (
     <AppActionsProvider value={actions}>
-      <div className="h-dvh overflow-hidden bg-background">
+      <div className="h-dvh overflow-hidden bg-background pt-[env(safe-area-inset-top,0px)] pr-[env(safe-area-inset-right,0px)] pl-[env(safe-area-inset-left,0px)]">
         <div className="flex h-full flex-col">
           <div className="min-h-0 flex-1 overflow-y-auto">
             <Outlet />
