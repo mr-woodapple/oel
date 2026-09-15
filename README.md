@@ -2,6 +2,21 @@
 
 The beer library you always needed, but never knew why.
 
+## Beer origin
+
+Beers can optionally store a country of origin. Choose **Herkunftsland** when
+creating or editing a beer; **Keine Angabe** leaves it unknown. The selected
+country appears in the beer details.
+
+The API exposes supported ISO 3166-1 alpha-2 codes at `GET /api/country` and
+accepts `countryCode` in beer POST, PUT, and PATCH requests. Codes are trimmed,
+normalized to uppercase, and validated against that list. Beer responses include
+the nullable `countryCode`. PUT clears it when omitted or empty; PATCH keeps it
+when omitted or null and clears it when empty.
+
+The `AddBeerCountry` migration adds a nullable column without changing existing
+beer data. As with other migrations, it is applied automatically at API startup.
+
 ## Container image
 
 The `oel` container image serves the frontend and API from one ASP.NET Core process.

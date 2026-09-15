@@ -78,6 +78,7 @@ function createBeerFormData(beer: CreateBeerInput, removePhoto = false) {
   const formData = new FormData();
   formData.append("name", beer.name);
   formData.append("brewery", beer.brewery);
+  if (beer.countryCode !== null) formData.append("countryCode", beer.countryCode);
   formData.append("style", beer.style);
 
   if (beer.abv !== null) formData.append("abv", String(beer.abv));

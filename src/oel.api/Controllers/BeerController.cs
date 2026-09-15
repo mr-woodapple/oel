@@ -21,6 +21,7 @@ public class BeerController(OelContext oelContext) : ControllerBase
                 beer.Id,
                 beer.Name,
                 beer.Brewery,
+                beer.CountryCode,
                 beer.Style,
                 beer.Abv,
                 beer.Ibu,
@@ -35,6 +36,7 @@ public class BeerController(OelContext oelContext) : ControllerBase
             beer.Id,
             beer.Name,
             beer.Brewery,
+            beer.CountryCode,
             beer.Style,
             beer.Abv,
             beer.Ibu,
@@ -89,6 +91,7 @@ public class BeerController(OelContext oelContext) : ControllerBase
         {
             Name = request.Name.Trim(),
             Brewery = request.Brewery.Trim(),
+            CountryCode = CountryCatalog.Normalize(request.CountryCode),
             Style = request.Style.Trim(),
             Abv = request.Abv,
             Ibu = request.Ibu,
@@ -181,6 +184,7 @@ public class BeerController(OelContext oelContext) : ControllerBase
 
         beer.Name = request.Name.Trim();
         beer.Brewery = request.Brewery.Trim();
+        beer.CountryCode = CountryCatalog.Normalize(request.CountryCode);
         beer.Style = request.Style.Trim();
         beer.Abv = request.Abv;
         beer.Ibu = request.Ibu;
@@ -251,6 +255,11 @@ public class BeerController(OelContext oelContext) : ControllerBase
             {
                 beer.Style = request.Style.Trim();
             }
+        }
+
+        if (request.CountryCode is not null)
+        {
+            beer.CountryCode = CountryCatalog.Normalize(request.CountryCode);
         }
 
         if (request.Abv is not null)

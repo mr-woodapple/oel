@@ -1,6 +1,8 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 import { useBeer } from "@/api/hooks/useBeer";
+import { countryOptions } from "@/api/queries/countryQueries";
 import {
   Drawer,
   DrawerClose,
@@ -16,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -34,6 +37,7 @@ type AddBeerDrawerProps = {
 const initialForm = {
   name: "",
   brewery: "",
+  countryCode: "",
   style: "",
   abv: "",
   ibu: "",
@@ -46,6 +50,7 @@ function formFromBeer(beer: Beer) {
   return {
     name: beer.name,
     brewery: beer.brewery,
+    countryCode: beer.countryCode ?? "",
     style: beer.style,
     abv: beer.abv === null ? "" : String(beer.abv),
     ibu: beer.ibu === null ? "" : String(beer.ibu),
@@ -57,6 +62,8 @@ function formFromBeer(beer: Beer) {
 
 export function AddBeerDrawer({ open, beer, onOpenChange }: AddBeerDrawerProps) {
   const { addBeer, updateBeer } = useBeer();
+  const countries = useQuery({ ...countryOptions, enabled: open });
+  const countryItems = [{ value: "", label: "Keine Angabe" }, ...(countries.data ?? [])];
   const [form, setForm] = useState(() => beer ? formFromBeer(beer) : initialForm);
   const [photo, setPhoto] = useState<File | null>(null);
   const [removePhoto, setRemovePhoto] = useState(false);
@@ -81,6 +88,7 @@ export function AddBeerDrawer({ open, beer, onOpenChange }: AddBeerDrawerProps) 
     const beerInput: CreateBeerInput = {
       name: form.name.trim(),
       brewery: form.brewery.trim(),
+      countryCode: form.countryCode || null,
       style: form.style.trim(),
       abv: form.abv === "" ? null : Number(form.abv),
       ibu: form.ibu === "" ? null : Number(form.ibu),
@@ -145,6 +153,40 @@ export function AddBeerDrawer({ open, beer, onOpenChange }: AddBeerDrawerProps) 
               />
             </FormField>
           </div>
+
+          <FormField label="Herkunftsland" htmlFor="beer-country">
+            <Select
+              items={countryItems}
+              value={form.countryCode}
+              onValueChange={(value) => updateField("countryCode", value ?? "")}
+              disabled={!countries.data?.length}
+            >
+              <SelectTrigger id="beer-country" className="h-11 w-full rounded-xl text-base">
+                <SelectValue placeholder="Land auswählen" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl" alignItemWithTrigger={false}>
+                <SelectGroup>
+                  {countryItems.map((country) => (
+                    <SelectItem key={country.value} value={country.value} className="text-sm">
+                      {country.label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+            {countries.isPending && <p className="text-sm text-muted-foreground">Länder werden geladen …</p>}
+            {countries.isError && (
+              <div role="alert" className="text-sm text-destructive">
+                Länder konnten nicht geladen werden.
+                <Button type="button" variant="link" onClick={() => countries.refetch()}>
+                  Erneut versuchen
+                </Button>
+              </div>
+            )}
+            {countries.isSuccess && countries.data.length === 0 && (
+              <p className="text-sm text-muted-foreground">Keine Länder verfügbar.</p>
+            )}
+          </FormField>
 
           <FormField label="Stil" htmlFor="beer-style" required>
             <Select value={form.style} onValueChange={(value) => updateField("style", value ?? "")}>

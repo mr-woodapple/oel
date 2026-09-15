@@ -10,6 +10,7 @@ http:
     type: json
     data: |-
       {
+        "countryCode": "BE",
         "tastingNotes": "Citrus, pine and a dry finish",
         "ibu": 55
       }
@@ -20,3 +21,6 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+
+docs: |-
+  Omit `countryCode` (or send null) to keep the country. Send an empty string to clear it.

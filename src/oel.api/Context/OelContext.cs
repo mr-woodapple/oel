@@ -13,6 +13,11 @@ public class OelContext(DbContextOptions<OelContext> options) : DbContext(option
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.Entity<Beer>()
+            .Property(beer => beer.CountryCode)
+            .HasMaxLength(2)
+            .IsUnicode(false);
+
+        modelBuilder.Entity<Beer>()
             .Property(beer => beer.PhotoContentType)
             .HasMaxLength(50);
 

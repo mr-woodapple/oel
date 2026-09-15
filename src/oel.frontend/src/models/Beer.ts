@@ -4,6 +4,7 @@ export interface Beer {
   // Core Identifiers
   name: string,
   brewery: string,
+  countryCode: string | null,
   style: string,
   abv: number | null,
   ibu: number | null,

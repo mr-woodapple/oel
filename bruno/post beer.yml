@@ -15,6 +15,9 @@ http:
       - name: brewery
         type: text
         value: Testbrauerei
+      - name: countryCode
+        type: text
+        value: DE
       - name: style
         type: text
         value: Teststyle
@@ -27,4 +30,5 @@ settings:
   maxRedirects: 5
 
 docs: |-
+  `countryCode` is optional. Use a two-letter code from GET /country, or omit it for an unknown origin.
   To include an optional photo, add a multipart file field named `photo`.
