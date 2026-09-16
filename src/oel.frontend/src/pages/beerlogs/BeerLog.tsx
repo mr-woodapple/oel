@@ -43,9 +43,10 @@ export default function BeerLog() {
 
   if (!log) {
     return (
+      // TODO: This could be nicer, maybe add a broken mug??
       <main className="flex min-h-full flex-col items-center justify-center px-6 text-center">
-        <h1 className="m-0! text-3xl! font-semibold text-foreground">Bier-Log nicht gefunden</h1>
-        <Button render={<Link to="/logs" />} variant="outline" className="mt-5 h-11 rounded-xl px-4 text-sm">
+        <h1 className="m-0 text-3xl font-semibold text-foreground">Bier-Log nicht gefunden</h1>
+        <Button render={<Link to="/logs" />} variant="outline" className="mt-5">
           Zurück zu den Bier-Logs
         </Button>
       </main>
@@ -53,12 +54,12 @@ export default function BeerLog() {
   }
 
   return (
-    <main className="min-h-full px-4 py-6 sm:px-8 sm:py-10">
+    <main className="min-h-full px-4 py-6">
       <Link to="/logs" className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground">
         <ArrowLeft className="size-4" /> Alle Bier-Logs
       </Link>
 
-      <header className="flex flex-col gap-5 border-b border-border/70 pb-7 text-left sm:flex-row sm:items-end sm:justify-between">
+      <header className="flex flex-col gap-5 text-left sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.16em] text-primary">Bier-Log</p>
           <h1 className="m-0! mt-1! text-3xl! font-semibold tracking-tight text-foreground sm:text-4xl!">
@@ -83,11 +84,11 @@ export default function BeerLog() {
         <img
           src={log.photoUrl}
           alt={`Foto zum Bier-Log${beer ? ` von ${beer.name}` : ""}`}
-          className="mt-6 aspect-[16/9] max-h-[32rem] w-full rounded-2xl border bg-muted object-cover shadow-sm"
+          className="mt-5 aspect-video max-h-128 w-full rounded-lg bg-muted object-cover"
         />
       )}
 
-      <Card className="mt-6 rounded-2xl text-base shadow-sm">
+      <Card className="mt-5 rounded-lg text-base">
         <CardHeader>
           <CardTitle className="text-lg">Verkostung</CardTitle>
         </CardHeader>

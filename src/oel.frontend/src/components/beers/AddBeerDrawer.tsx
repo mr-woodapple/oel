@@ -3,28 +3,13 @@ import { useQuery } from "@tanstack/react-query";
 
 import { useBeer } from "@/api/hooks/useBeer";
 import { countryOptions } from "@/api/queries/countryQueries";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer";
+import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { PhotoInput } from "@/components/shared/PhotoInput";
+import FormField from "@/components/shared/form/FormField";
 import { beerStyles } from "@/data/beerStyles";
 import type { Beer, CreateBeerInput, UpdateBeerInput } from "@/models/Beer";
 
@@ -132,11 +117,11 @@ export function AddBeerDrawer({ open, beer, onOpenChange }: AddBeerDrawerProps) 
           className="flex flex-1 flex-col gap-6 overflow-y-auto p-4"
           onSubmit={handleSubmit}
         >
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4">
             <FormField label="Name" htmlFor="beer-name" required>
               <Input
                 id="beer-name"
-                className="h-11 rounded-xl text-base"
+                placeholder="Name des Biers..."
                 value={form.name}
                 onChange={(event) => updateField("name", event.target.value)}
                 autoComplete="off"
@@ -146,7 +131,7 @@ export function AddBeerDrawer({ open, beer, onOpenChange }: AddBeerDrawerProps) 
             <FormField label="Brauerei" htmlFor="beer-brewery" required>
               <Input
                 id="beer-brewery"
-                className="h-11 rounded-xl text-base"
+                placeholder="Name der Brauerei..."
                 value={form.brewery}
                 onChange={(event) => updateField("brewery", event.target.value)}
                 required
@@ -161,17 +146,15 @@ export function AddBeerDrawer({ open, beer, onOpenChange }: AddBeerDrawerProps) 
               onValueChange={(value) => updateField("countryCode", value ?? "")}
               disabled={!countries.data?.length}
             >
-              <SelectTrigger id="beer-country" className="h-11 w-full rounded-xl text-base">
+              <SelectTrigger id="beer-country" className="w-full">
                 <SelectValue placeholder="Land auswählen" />
               </SelectTrigger>
-              <SelectContent className="rounded-xl" alignItemWithTrigger={false}>
-                <SelectGroup>
-                  {countryItems.map((country) => (
-                    <SelectItem key={country.value} value={country.value} className="text-sm">
-                      {country.label}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
+              <SelectContent alignItemWithTrigger={false}>
+                {countryItems.map((country) => (
+                  <SelectItem key={country.value} value={country.value}>
+                    {country.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             {countries.isPending && <p className="text-sm text-muted-foreground">Länder werden geladen …</p>}
@@ -190,12 +173,12 @@ export function AddBeerDrawer({ open, beer, onOpenChange }: AddBeerDrawerProps) 
 
           <FormField label="Stil" htmlFor="beer-style" required>
             <Select value={form.style} onValueChange={(value) => updateField("style", value ?? "")}>
-              <SelectTrigger id="beer-style" className="h-11 w-full rounded-xl text-base">
+              <SelectTrigger id="beer-style" className="w-full">
                 <SelectValue placeholder="Bierstil auswählen" />
               </SelectTrigger>
-              <SelectContent className="rounded-xl">
+              <SelectContent alignItemWithTrigger={false}>
                 {beerStyles.map((beerStyle) => (
-                  <SelectItem key={beerStyle} value={beerStyle} className="text-sm">
+                  <SelectItem key={beerStyle} value={beerStyle}>
                     {beerStyle}
                   </SelectItem>
                 ))}
@@ -207,9 +190,9 @@ export function AddBeerDrawer({ open, beer, onOpenChange }: AddBeerDrawerProps) 
             <FormField label="Alkoholgehalt (%)" htmlFor="beer-abv">
               <Input
                 id="beer-abv"
-                className="h-11 rounded-xl text-base"
                 type="number"
                 inputMode="decimal"
+                placeholder="5,5"
                 min="0"
                 max="100"
                 step="0.1"
@@ -220,9 +203,9 @@ export function AddBeerDrawer({ open, beer, onOpenChange }: AddBeerDrawerProps) 
             <FormField label="Bitterkeit (IBU)" htmlFor="beer-ibu">
               <Input
                 id="beer-ibu"
-                className="h-11 rounded-xl text-base"
                 type="number"
                 inputMode="numeric"
+                placeholder="20"
                 min="0"
                 step="1"
                 value={form.ibu}
@@ -243,7 +226,7 @@ export function AddBeerDrawer({ open, beer, onOpenChange }: AddBeerDrawerProps) 
           <FormField label="Aussehen" htmlFor="beer-appearance">
             <Textarea
               id="beer-appearance"
-              className="min-h-24 rounded-xl text-base"
+              className="min-h-24 rounded-lg text-base"
               placeholder="Farbe, Schaum, Klarheit …"
               value={form.appearance}
               onChange={(event) => updateField("appearance", event.target.value)}
@@ -252,7 +235,7 @@ export function AddBeerDrawer({ open, beer, onOpenChange }: AddBeerDrawerProps) 
           <FormField label="Geschmacksnotizen" htmlFor="beer-tasting-notes">
             <Textarea
               id="beer-tasting-notes"
-              className="min-h-24 rounded-xl text-base"
+              className="min-h-24 rounded-lg text-base"
               placeholder="Aromen, Mundgefühl, Abgang …"
               value={form.tastingNotes}
               onChange={(event) => updateField("tastingNotes", event.target.value)}
@@ -261,14 +244,14 @@ export function AddBeerDrawer({ open, beer, onOpenChange }: AddBeerDrawerProps) 
           <FormField label="Allgemeine Notizen" htmlFor="beer-general-notes">
             <Textarea
               id="beer-general-notes"
-              className="min-h-24 rounded-xl text-base"
+              className="min-h-24 rounded-lg text-base"
               value={form.generalNotes}
               onChange={(event) => updateField("generalNotes", event.target.value)}
             />
           </FormField>
         </form>
 
-        <DrawerFooter>
+        <DrawerFooter className="mt-5">
           <Button
             type="submit"
             form="beer-form"
@@ -284,23 +267,5 @@ export function AddBeerDrawer({ open, beer, onOpenChange }: AddBeerDrawerProps) 
         </DrawerFooter>
       </DrawerContent>
     </Drawer>
-  );
-}
-
-type FormFieldProps = {
-  label: string;
-  htmlFor: string;
-  required?: boolean;
-  children: React.ReactNode;
-};
-
-function FormField({ label, htmlFor, required, children }: FormFieldProps) {
-  return (
-    <div className="grid gap-2">
-      <Label htmlFor={htmlFor} className="text-sm font-medium text-foreground">
-        {label}{required && <span className="text-destructive">*</span>}
-      </Label>
-      {children}
-    </div>
   );
 }

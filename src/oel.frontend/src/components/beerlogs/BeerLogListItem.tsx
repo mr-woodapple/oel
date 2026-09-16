@@ -2,14 +2,7 @@ import { Beer as BeerIcon, ChevronRight, MapPin } from "lucide-react";
 import { Link } from "react-router";
 
 import { Badge } from "@/components/ui/badge";
-import {
-  Item,
-  ItemActions,
-  ItemContent,
-  ItemDescription,
-  ItemMedia,
-  ItemTitle,
-} from "@/components/ui/item";
+import { Item, ItemActions, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "@/components/ui/item";
 import { formatLocation, formatLogDate, formatServingFormat } from "@/lib/beerFormatting";
 import type { Beer } from "@/models/Beer";
 import type { BeerLog } from "@/models/BeerLog";
@@ -25,9 +18,9 @@ export function BeerLogListItem({ log, beer }: BeerLogListItemProps) {
     <Item
       render={<Link to={`/logs/${log.id}`} />}
       variant="outline"
-      className="rounded-2xl bg-card p-4 text-base shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md sm:p-5"
+      className="rounded-lg bg-card p-4 text-base transition hover:-translate-y-0.5 hover:shadow-md"
     >
-      <ItemMedia className="flex size-14 items-center justify-center overflow-hidden rounded-xl bg-primary/15 text-primary">
+      <ItemMedia className="flex size-14 items-center justify-center overflow-hidden rounded-md bg-primary/15 text-primary">
         {log.photoUrl ? (
           <img src={log.photoUrl} alt="" className="size-full object-cover" loading="lazy" />
         ) : (
