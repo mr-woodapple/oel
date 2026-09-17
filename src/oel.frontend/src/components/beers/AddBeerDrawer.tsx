@@ -101,7 +101,7 @@ export function AddBeerDrawer({ open, beer, onOpenChange }: AddBeerDrawerProps) 
   }
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange} swipeDirection="down">
+    <Drawer open={open} onOpenChange={onOpenChange} swipeDirection="down" showSwipeHandle>
       <DrawerContent>
         <DrawerHeader>
           <DrawerTitle>{beer ? "Bier bearbeiten" : "Bier hinzufügen"}</DrawerTitle>

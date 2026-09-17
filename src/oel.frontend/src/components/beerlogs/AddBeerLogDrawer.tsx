@@ -109,7 +109,7 @@ export function AddBeerLogDrawer({
   const noBeers = beers.isSuccess && beers.data.length === 0;
 
   return (
-    <Drawer open={open} onOpenChange={handleOpenChange} swipeDirection="down">
+    <Drawer open={open} onOpenChange={handleOpenChange} swipeDirection="down" showSwipeHandle>
       <DrawerContent>
         <DrawerHeader>
           <DrawerTitle>{beerLog ? "Bier-Log bearbeiten" : "Bier-Log hinzufügen"}</DrawerTitle>
