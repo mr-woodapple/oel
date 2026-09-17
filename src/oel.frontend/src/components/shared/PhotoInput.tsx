@@ -86,17 +86,17 @@ export function PhotoInput({
     <div className="grid gap-2">
       <Label htmlFor={id} className="text-sm font-medium text-foreground">Foto</Label>
       {displayedPhotoUrl && (
-        <div className="relative overflow-hidden rounded-2xl border bg-muted">
+        <div className="relative overflow-hidden rounded-lg border bg-muted">
           <img
             src={displayedPhotoUrl}
             alt={photo ? "Vorschau des ausgewählten Fotos" : "Aktuell gespeichertes Foto"}
-            className="aspect-[4/3] max-h-72 w-full object-cover"
+            className="aspect-4/3 max-h-72 w-full object-cover"
           />
           <Button
             type="button"
             size="icon"
             variant="secondary"
-            className="absolute right-3 top-3 rounded-full"
+            className="absolute right-3 top-3"
             onClick={removePhoto}
             aria-label="Foto entfernen"
           >
@@ -113,14 +113,14 @@ export function PhotoInput({
               id={id}
               type="file"
               accept="image/jpeg,image/png,image/webp,image/gif,image/avif,image/heic,image/heif"
-              className="h-11 rounded-xl pl-10 text-base file:mr-3"
+              className="pl-10 file:mr-3"
               onChange={handleChange}
               aria-describedby={`${id}-help${error ? ` ${id}-error` : ""}`}
               aria-invalid={Boolean(error)}
             />
           </div>
           <p id={`${id}-help`} className="text-xs text-muted-foreground">
-            Optional · maximal 10 MB
+            Optional · Maximal 10 MB
           </p>
         </>
       )}

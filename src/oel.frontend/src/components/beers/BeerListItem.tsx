@@ -1,15 +1,8 @@
-import { Beer as BeerIcon, ChevronRight } from "lucide-react";
 import { Link } from "react-router";
+import { Beer as BeerIcon, ChevronRight } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import {
-  Item,
-  ItemActions,
-  ItemContent,
-  ItemDescription,
-  ItemMedia,
-  ItemTitle,
-} from "@/components/ui/item";
+import { Item, ItemActions, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "@/components/ui/item";
 import type { Beer } from "@/models/Beer";
 
 type BeerListItemProps = {
@@ -21,9 +14,9 @@ export function BeerListItem({ beer }: BeerListItemProps) {
     <Item
       render={<Link to={`/beers/${beer.id}`} />}
       variant="outline"
-      className="rounded-2xl bg-card p-4 text-base shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md sm:p-5"
+      className="rounded-lg bg-card p-4 text-base transition hover:-translate-y-0.5 hover:shadow-md"
     >
-      <ItemMedia className="flex size-14 items-center justify-center overflow-hidden rounded-xl bg-primary/15 text-primary">
+      <ItemMedia className="flex size-14 items-center justify-center overflow-hidden rounded-md bg-primary/15 text-primary">
         {beer.photoUrl ? (
           <img src={beer.photoUrl} alt="" className="size-full object-cover" loading="lazy" />
         ) : (

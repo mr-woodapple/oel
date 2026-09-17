@@ -26,7 +26,7 @@ export function EmptyState({ title, description }: EmptyStateProps) {
       <div className="mb-4 flex size-12 items-center justify-center rounded-2xl bg-primary/15 text-primary">
         <BeerIcon className="size-6" />
       </div>
-      <h2 className="m-0! text-xl! font-semibold text-foreground">{title}</h2>
+      <h2 className="text-xl font-semibold text-foreground">{title}</h2>
       <p className="mt-2 max-w-sm text-base text-muted-foreground">{description}</p>
     </div>
   );
@@ -36,7 +36,7 @@ export function ErrorState() {
   return (
     <div className="flex min-h-48 flex-col items-center justify-center rounded-3xl border border-destructive/30 bg-destructive/5 px-6 py-10 text-center">
       <AlertCircle className="mb-3 size-7 text-destructive" />
-      <h2 className="m-0! text-xl! font-semibold text-foreground">Daten konnten nicht geladen werden</h2>
+      <h2 className="text-xl font-semibold text-foreground">Daten konnten nicht geladen werden</h2>
       <p className="mt-2 text-base text-muted-foreground">Bitte versuche es gleich noch einmal.</p>
     </div>
   );

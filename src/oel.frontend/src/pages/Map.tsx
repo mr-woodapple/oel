@@ -19,14 +19,14 @@ export default function MapPage() {
   );
 
   const description = beerLogs.isSuccess && beers.isSuccess
-   ? `${mappedLogs.length} ${mappedLogs.length === 1 ? "Moment" : "Momente"} auf der Karte`
-   : "Deine Bier-Momente an ihren Orten";
+    ? `${mappedLogs.length} ${mappedLogs.length === 1 ? "Moment" : "Momente"} auf der Karte`
+    : "Deine Bier-Momente an ihren Orten";
 
   return (
     <main className="flex h-full min-h-136 flex-col px-4 py-6 sm:px-8 sm:py-10">
       <header className="shrink-0 text-left">
         <p className="mb-1 text-sm font-semibold uppercase tracking-[0.16em] text-primary">Orte</p>
-        <h1 className="m-0! text-3xl! font-semibold sm:text-4xl!">Karte</h1>
+        <h1 className="m-0 text-3xl font-semibold sm:text-4xl">Karte</h1>
         <p className="mt-2 text-base text-muted-foreground">{description}</p>
       </header>
 

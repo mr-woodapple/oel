@@ -99,7 +99,7 @@ export function BeerLogMap({ logs, beersById }: BeerLogMapProps) {
   return (
     <div
       ref={containerRef}
-      className="h-full min-h-80 w-full bg-muted font-sans"
+      className="isolate h-full min-h-80 w-full bg-muted font-sans"
       role="region"
       aria-label={`Karte mit ${logs.length} ${logs.length === 1 ? "Bier-Log" : "Bier-Logs"}`}
     />

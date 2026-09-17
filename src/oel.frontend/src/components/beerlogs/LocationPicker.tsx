@@ -2,18 +2,11 @@ import { useState, type FormEvent } from "react";
 import { Crosshair, LoaderCircle, MapPin, Pencil, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer";
+import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { BeerLogLocation } from "@/models/BeerLog";
+import FormField from "@/components/shared/form/FormField";
 
 type LocationPickerProps = {
   value: BeerLogLocation | null;
@@ -22,14 +15,13 @@ type LocationPickerProps = {
 
 export function LocationPicker({ value, onChange }: LocationPickerProps) {
   const [coordinateDrawerOpen, setCoordinateDrawerOpen] = useState(false);
-  const [name, setName] = useState("");
+  const [name, setName] = useState(value?.name ?? "");
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
   const [isLocating, setIsLocating] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
 
   function openCoordinateDrawer() {
-    setName(value?.name ?? "");
     setLatitude(value?.latitude === null || value?.latitude === undefined ? "" : String(value.latitude));
     setLongitude(value?.longitude === null || value?.longitude === undefined ? "" : String(value.longitude));
     setCoordinateDrawerOpen(true);
@@ -47,7 +39,7 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         onChange({
-          name: null,
+          name: name ?? "",
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
         });
@@ -81,10 +73,29 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
     setCoordinateDrawerOpen(false);
   }
 
+  // FIXME: far from ideal, but name should be present for every location, not only custom coordinate inputs
+  function saveLocationName(value: string) {
+    setName(value)
+    const parsedLatitude = Number(latitude);
+    const parsedLongitude = Number(longitude);
+
+    onChange({
+      name: name.trim() || null,
+      latitude: parsedLatitude !== 0 ? parsedLatitude : null,
+      longitude: parsedLongitude !== 0 ? parsedLongitude : null,
+    });
+  }
+
+  function clearLocation() {
+    setName("");
+    onChange(null);
+  }
+
   return (
     <>
-      <div className="grid gap-3">
-        <Label className="text-sm font-medium text-foreground">Ort</Label>
+      <div className="grid gap-2">
+        <Label className="text-foreground">Ort</Label>
+        <Label className="text-sm text-muted-foreground">Nutze deinen aktuellen Standort oder gib Koordinaten ein. Eine Bezeichnung ist optional.</Label>
 
         {value && (
           <div className="flex items-start gap-3 rounded-xl border border-border bg-muted/35 p-3 text-left">
@@ -104,21 +115,29 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
               variant="ghost"
               size="icon-sm"
               aria-label="Ort entfernen"
-              onClick={() => onChange(null)}
+              onClick={() => clearLocation()}
             >
               <Trash2 className="size-4" />
             </Button>
           </div>
         )}
 
-        <div className="grid gap-2 sm:grid-cols-2">
+        <div className="grid gap-2">
+          <FormField label="Bezeichnung" htmlFor="location-name">
+            <Input
+              id="location-name"
+              placeholder="z. B. Mikkeller Bar"
+              value={name}
+              onChange={(event) => saveLocationName(event.target.value)}
+            />
+          </FormField>
+
           <Button type="button" variant="secondary" onClick={useCurrentLocation} disabled={isLocating}>
             {isLocating ? <LoaderCircle className="animate-spin" /> : <Crosshair />}
-            {isLocating ? "Standort wird ermittelt …" : "Aktuellen Standort verwenden"}
+            {isLocating ? "Standort wird ermittelt..." : "Aktuellen Standort verwenden"}
           </Button>
           <Button type="button" variant="outline" onClick={openCoordinateDrawer}>
-            <Pencil />
-            {value ? "Anderen Ort eingeben" : "Koordinaten eingeben"}
+            <Pencil /> Koordinaten eingeben
           </Button>
         </div>
 
@@ -130,9 +149,9 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
       <Drawer open={coordinateDrawerOpen} onOpenChange={setCoordinateDrawerOpen} swipeDirection="down">
         <DrawerContent>
           <DrawerHeader>
-            <DrawerTitle>Anderen Ort eingeben</DrawerTitle>
+            <DrawerTitle>Koordinaten eingeben</DrawerTitle>
             <DrawerDescription>
-              Gib Breiten- und Längengrad ein. Eine Bezeichnung ist optional.
+              Gib Breiten- und Längengrad ein.
             </DrawerDescription>
           </DrawerHeader>
           <form
@@ -140,22 +159,10 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
             className="grid flex-1 gap-5 overflow-y-auto p-4"
             onSubmit={saveCoordinates}
           >
-            <div className="grid gap-2">
-              <Label htmlFor="location-name">Bezeichnung</Label>
-              <Input
-                id="location-name"
-                className="h-11 rounded-xl text-base"
-                placeholder="z. B. Mikkeller Bar"
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-              />
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="grid gap-2">
-                <Label htmlFor="location-latitude">Breitengrad*</Label>
+            <div className="grid gap-4">
+              <FormField label="Breitengrad" htmlFor="location-latitude" required>
                 <Input
                   id="location-latitude"
-                  className="h-11 rounded-xl text-base"
                   type="number"
                   inputMode="decimal"
                   min="-90"
@@ -166,12 +173,11 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
                   onChange={(event) => setLatitude(event.target.value)}
                   required
                 />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="location-longitude">Längengrad*</Label>
+              </FormField>
+
+              <FormField label="Längengrad" htmlFor="location-longitude" required>
                 <Input
                   id="location-longitude"
-                  className="h-11 rounded-xl text-base"
                   type="number"
                   inputMode="decimal"
                   min="-180"
@@ -182,7 +188,7 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
                   onChange={(event) => setLongitude(event.target.value)}
                   required
                 />
-              </div>
+              </FormField>
             </div>
           </form>
           <DrawerFooter>

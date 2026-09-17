@@ -45,7 +45,7 @@ export default function Beer() {
   if (!beer) {
     return (
       <main className="flex min-h-full flex-col items-center justify-center px-6 text-center">
-        <h1 className="m-0! text-3xl! font-semibold text-foreground">Bier nicht gefunden</h1>
+        <h1 className="text-3xl font-semibold text-foreground">Bier nicht gefunden</h1>
         <Button render={<Link to="/beers" />} variant="outline" className="mt-5 h-11 rounded-xl px-4 text-sm">
           Zurück zu den Bieren
         </Button>
@@ -54,19 +54,19 @@ export default function Beer() {
   }
 
   return (
-    <main className="min-h-full px-4 py-6 sm:px-8 sm:py-10">
+    <main className="min-h-full px-4 py-6 ">
       <Link to="/beers" className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground">
         <ArrowLeft className="size-4" /> Alle Biere
       </Link>
 
-      <header className="flex flex-col gap-5 border-b border-border/70 pb-7 sm:flex-row sm:items-end sm:justify-between">
+      <header className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex items-start gap-4 text-left">
           <div className="mt-1 flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/15 text-primary">
             <BeerIcon className="size-6" />
           </div>
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.16em] text-primary">{beer.brewery}</p>
-            <h1 className="m-0! mt-1! text-3xl! font-semibold tracking-tight text-foreground sm:text-4xl!">{beer.name}</h1>
+            <h1 className="mt-1 text-3xl font-semibold tracking-tight text-foreground">{beer.name}</h1>
             <p className="mt-2 text-base text-muted-foreground">{beer.style}</p>
           </div>
         </div>
@@ -90,15 +90,15 @@ export default function Beer() {
         <img
           src={beer.photoUrl}
           alt={`${beer.name} von ${beer.brewery}`}
-          className="mt-6 aspect-[16/9] max-h-[32rem] w-full rounded-2xl border bg-muted object-cover shadow-sm"
+          className="mt-6 aspect-video max-h-128 w-full rounded-lg border bg-muted object-cover"
         />
       )}
 
       <div className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.7fr)]">
         <section className="grid content-start gap-5" aria-label="Bierdetails">
-          <Card className="rounded-2xl text-base shadow-sm">
+          <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Steckbrief</CardTitle>
+              <CardTitle>Steckbrief</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-wrap gap-2">
               <Badge className="rounded-full" variant="secondary">{beer.style}</Badge>
@@ -109,8 +109,10 @@ export default function Beer() {
           </Card>
 
           {(beer.appearance || beer.tastingNotes || beer.generalNotes) && (
-            <Card className="rounded-2xl text-base shadow-sm">
-              <CardHeader><CardTitle className="text-lg">Notizen</CardTitle></CardHeader>
+            <Card>
+              <CardHeader>
+                <CardTitle>Notizen</CardTitle>
+              </CardHeader>
               <CardContent className="grid gap-5 text-left">
                 {beer.appearance && <Note title="Aussehen" text={beer.appearance} />}
                 {beer.tastingNotes && <Note title="Geschmack" text={beer.tastingNotes} />}
@@ -122,11 +124,11 @@ export default function Beer() {
 
         <section aria-label="Logs zu diesem Bier">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="m-0! text-xl! font-semibold text-foreground">Bier-Logs</h2>
+            <h2 className="text-xl font-semibold text-foreground">Bier-Logs</h2>
             <span className="text-sm text-muted-foreground">{logs.length}</span>
           </div>
           {logs.length === 0 ? (
-            <div className="rounded-2xl border border-dashed p-6 text-left text-base text-muted-foreground">
+            <div className="rounded-lg border border-dashed p-5 text-left text-base text-muted-foreground">
               Dieses Bier hat noch keinen Log.
             </div>
           ) : (
