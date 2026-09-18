@@ -138,14 +138,6 @@
   [role="button"]:not(:disabled) {
     cursor: pointer;
   }
-
-  /* Float shadcn/ui drawers with rounded corners on every edge. */
-  [data-slot="drawer-popup"] {
-    @apply rounded-xl;
-    --drawer-inset: calc(var(--spacing) * 2);
-    /* Keep the swipe overshoot background from filling the inset. */
-    --drawer-bleed-background: transparent;
-  }
 }
 
 .dbg {
