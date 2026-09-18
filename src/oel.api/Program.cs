@@ -2,8 +2,15 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using Oel.Api.Binding;
 using Oel.Api.Context;
+using Oel.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddHttpClient<GeoapifyService>(client =>
+{
+    client.BaseAddress = new Uri("https://api.geoapify.com/");
+    client.Timeout = TimeSpan.FromSeconds(15);
+}).RemoveAllLoggers(); // Geoapify URLs contain the API key and location queries.
 
 // Add services to the container.
 builder.Services.AddControllers(options =>
