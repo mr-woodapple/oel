@@ -92,6 +92,6 @@ Merge that commit into `main`, then create an annotated tag on the merged commit
 ```powershell
 git switch main
 git pull --ff-only
-git tag -a v1.2.3 -m "Oel v1.2.3"
+git tag -a v1.2.3 -m "oel v1.2.3"
 git push origin v1.2.3
 ```
