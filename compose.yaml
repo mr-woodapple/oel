@@ -1,0 +1,26 @@
+services:
+  oel:
+    container_name: oel
+    image: ghcr.io/mr-woodapple/oel:dev
+    ports:
+      - ${FE_PORT:-7150}:8080
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Production"
+      ConnectionStrings__DatabaseConnection: ${DatabaseConnection}
+      Geoapify__ApiKey: ${GeoapifyApiKey}
+    restart: unless-stopped
+    depends_on:
+      - oel-sql-server
+  
+  oel-sql-server:
+    container_name: oel.sqlserver
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      MSSQL_SA_PASSWORD: ${DatabaseSAPassword}
+      ACCEPT_EULA: "Y"
+    volumes:
+      - sqlData:/var/opt/mssql
+    restart: unless-stopped
+    
+volumes:
+  sqlData:
