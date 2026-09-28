@@ -4,7 +4,7 @@ public sealed record PhotoData(byte[] Bytes, string ContentType);
 
 public static class PhotoUpload
 {
-    public const long MaxSize = 10 * 1024 * 1024;
+    private static readonly long _maxSize = 20 * 1024 * 1024; // 20 MB
 
     private static readonly HashSet<string> AllowedContentTypes = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -26,9 +26,9 @@ public static class PhotoUpload
             return (null, null);
         }
 
-        if (file.Length > MaxSize)
+        if (file.Length > _maxSize)
         {
-            return (null, "Photo must be 10 MB or smaller.");
+            return (null, "Photo must be 20 MB or smaller.");
         }
 
         if (!AllowedContentTypes.Contains(file.ContentType))
