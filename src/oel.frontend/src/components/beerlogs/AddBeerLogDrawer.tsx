@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { Fragment, useEffect, useState, type FormEvent } from "react";
 
 import { useBeer } from "@/api/hooks/useBeer";
 import { useBeerLogs } from "@/api/hooks/useBeerLogs";
@@ -6,11 +6,13 @@ import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, Dr
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { servingFormats } from "@/data/servingFormats";
 import { localDateTimeToOffset, toLocalDateTimeInput } from "@/lib/beerFormatting";
-import { servingFormats, type BeerLog, type BeerLogLocation, type CreateBeerLogInput, type UpdateBeerLogInput } from "@/models/BeerLog";
+import type { BeerLog, BeerLogLocation, CreateBeerLogInput, UpdateBeerLogInput } from "@/models/BeerLog";
 import { PhotoInput } from "@/components/shared/PhotoInput";
 import { LocationPicker } from "@/components/beerlogs/LocationPicker";
 import FormField from "@/components/shared/form/FormField";
+import { Combobox, ComboboxContent, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList } from "@/components/ui/combobox";
 
 type AddBeerLogDrawerProps = {
   open: boolean;
@@ -19,14 +21,6 @@ type AddBeerLogDrawerProps = {
   onOpenChange: (open: boolean) => void;
   onRequestAddBeer: () => void;
 };
-
-const formatOptions = [
-  { value: servingFormats.Draft, label: "Fass" },
-  { value: servingFormats.Can, label: "Dose" },
-  { value: servingFormats.Bottle, label: "Flasche" },
-  { value: servingFormats.Cask, label: "Cask" },
-  { value: servingFormats.Other, label: "Anderes" },
-];
 
 export function AddBeerLogDrawer({
   open,
@@ -121,8 +115,8 @@ export function AddBeerLogDrawer({
         </DrawerHeader>
 
         {noBeers ? (
-          // Replace with shadcn empty thing
-          <>
+          // TODO: Replace with shadcn empty thing
+          <Fragment>
             <div className="flex-1 overflow-y-auto p-4">
               <div className="flex min-h-64 flex-col items-center justify-center text-center">
                 <h2 className="m-0 text-xl font-semibold text-foreground">Zuerst ein Bier anlegen</h2>
@@ -136,7 +130,7 @@ export function AddBeerLogDrawer({
                 Bier hinzufügen
               </Button>
             </DrawerFooter>
-          </>
+          </Fragment>
         ) : (
           <>
             <form
@@ -145,19 +139,27 @@ export function AddBeerLogDrawer({
               onSubmit={handleSubmit}
             >
               <div className="grid gap-4">
-                <FormField label="Bier" htmlFor="log-beer" required>
-                  <Select value={beerId} onValueChange={(value) => setSelectedBeerId(value ?? "")}>
-                    <SelectTrigger id="log-beer" className="w-full" disabled={beers.isPending}>
-                      <SelectValue placeholder={beers.isPending ? "Biere werden geladen …" : "Bier auswählen"} />
-                    </SelectTrigger>
-                    <SelectContent alignItemWithTrigger={false}>
-                      {beers.data?.map((beer) => (
-                        <SelectItem key={beer.id} value={String(beer.id)}>
-                          {beer.name} · {beer.brewery}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                <FormField label="Bier" htmlFor="log-beer" required >
+                  <Combobox
+                    items={beers.data ?? []}
+                    itemToStringLabel={(beer) => beer?.name ?? ""}
+                    value={beers.data?.find((b) => String(b.id) === beerId) ?? null}
+                    onValueChange={(beer) => setSelectedBeerId(beer ? String(beer.id) : "")}
+                    isItemEqualToValue={(item, val) => item?.id === val?.id}
+                    autoHighlight
+                  >
+                    <ComboboxInput id="log-beer" placeholder="Bier auswählen" />
+                    <ComboboxContent>
+                      <ComboboxEmpty>Keine Biere gefunden.</ComboboxEmpty>
+                      <ComboboxList>
+                        {(beer) => (
+                          <ComboboxItem key={beer.id} value={beer}>
+                            {beer.name} ({beer.brewery})
+                          </ComboboxItem>
+                        )}
+                      </ComboboxList>
+                    </ComboboxContent>
+                  </Combobox>
                 </FormField>
               </div>
 
@@ -179,12 +181,17 @@ export function AddBeerLogDrawer({
                 </div>
                 <div className="grid gap-2">
                   <FormField label="Serviert als" htmlFor="log-format" required>
-                    <Select value={format} onValueChange={(value) => setFormat(value ?? String(servingFormats.Draft))}>
+                    <Select
+                      items={servingFormats.map((option) => ({ value: String(option.value), label: option.label }))}
+                      value={format}
+                      onValueChange={(value) => setFormat(value ?? "")}
+                      required
+                    >
                       <SelectTrigger id="log-format" className="w-full">
                         <SelectValue placeholder="Serviert als?" />
                       </SelectTrigger>
                       <SelectContent alignItemWithTrigger={false}>
-                        {formatOptions.map((option) => (
+                        {servingFormats.map((option) => (
                           <SelectItem key={option.value} value={String(option.value)}>
                             {option.label}
                           </SelectItem>
