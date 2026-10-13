@@ -1,0 +1,22 @@
+﻿<Project Sdk="Aspire.AppHost.Sdk/13.6.1">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AspireUseCliBundle>true</AspireUseCliBundle>
+    <UserSecretsId>53ac5833-1d3f-468d-898f-f72accd811bd</UserSecretsId>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Aspire.Hosting.JavaScript" Version="13.6.1" />
+		<PackageReference Include="CommunityToolkit.Aspire.Hosting.SqlDatabaseProjects" Version="13.6.0" />
+		<PackageReference Include="Microsoft.NET.StringTools" Version="18.4.0" />
+	</ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\oel.api\oel.api.csproj" />
+  </ItemGroup>
+
+</Project>
