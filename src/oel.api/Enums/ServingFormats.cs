@@ -5,6 +5,5 @@ public enum ServingFormats
     Draft,
     Can,
     Bottle,
-    Cask,
     Other
 }

@@ -1,4 +1,5 @@
-import { servingFormats, type BeerLogLocation, type ServingFormat } from "@/models/BeerLog";
+import { servingFormats, type ServingFormat } from "@/data/servingFormats";
+import type { BeerLogLocation } from "@/models/BeerLog";
 
 export function formatLocation(location: BeerLogLocation | null) {
   if (!location) return "Nicht angegeben";
@@ -11,16 +12,8 @@ export function formatLocation(location: BeerLogLocation | null) {
   return "Koordinaten nicht verfügbar";
 }
 
-const servingFormatLabels: Record<ServingFormat, string> = {
-  [servingFormats.Draft]: "Fass",
-  [servingFormats.Can]: "Dose",
-  [servingFormats.Bottle]: "Flasche",
-  [servingFormats.Cask]: "Cask",
-  [servingFormats.Other]: "Anderes",
-};
-
 export function formatServingFormat(format: ServingFormat) {
-  return servingFormatLabels[format] ?? "Unbekannt";
+  return servingFormats.find((option) => option.value === format)?.label ?? "Unbekannt";
 }
 
 export function formatLogDate(value: string) {
